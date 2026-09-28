@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CRM Afiliados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ─────────────────────────────────────────────────────── */
+:root {
+  --bg: #EFF1F8;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FC;
+  --border: #D3D9EC;
+  --border-2: #B0BAD5;
+  --text-1: #18202E;
+  --text-2: #4A5568;
+  --text-3: #8A93AE;
+  --primary: #2952CC;
+  --primary-hover: #1A3A99;
+  --primary-dim: #EBF0FD;
+  --danger: #DC2626; --danger-dim: #FEF2F2;
+  --success: #059669; --success-dim: #ECFDF5;
+  --warning: #D97706; --warning-dim: #FFF7ED;
+  --info: #0882A8; --info-dim: #E0F5FA;
+  --sb-bg: #111827;
+  --sb-border: #1F2937;
+  --sb-text: #D1D5DB;
+  --sb-muted: #6B7280;
+  --sb-active-bg: rgba(255,255,255,.08);
+  --sb-active-text: #FFFFFF;
+  --sb-hover: rgba(255,255,255,.04);
+  --shadow: 0 1px 3px rgba(0,0,0,.07),0 1px 8px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.1);
+  --r: 8px; --r-sm: 5px; --r-full: 9999px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Sora',sans-serif}
+a{color:var(--primary);text-decoration:none}
+button{cursor:pointer;font-family:inherit;font-size:13px}
+input,select,textarea{font-family:inherit;font-size:14px}
+
+/* ── Layout ──────────────────────────────────────────────────────── */
+.hidden{display:none!important}
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:230px;flex-shrink:0;background:var(--sb-bg);border-right:1px solid var(--sb-border);display:flex;flex-direction:column;overflow-y:auto}
+#main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page{padding:28px 32px 48px;max-width:1100px;width:100%}
+
+/* ── Auth ────────────────────────────────────────────────────────── */
+#auth{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:16px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:36px 40px;width:100%;max-width:420px;box-shadow:var(--shadow-md)}
+.auth-logo{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.auth-title{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--text-3);margin-bottom:24px}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.sb-brand{padding:20px 16px 16px;border-bottom:1px solid var(--sb-border)}
+.sb-brand-label{font-size:10px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--sb-muted);margin-bottom:3px}
+.sb-brand-name{font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:var(--sb-active-text)}
+.sb-user{padding:12px 16px;border-bottom:1px solid var(--sb-border)}
+.sb-user-name{font-size:13px;font-weight:600;color:var(--sb-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--sb-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.sb-nav{flex:1;padding:10px 8px}
+.sb-section{font-size:9px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--sb-muted);padding:14px 8px 6px}
+.sb-link{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;color:var(--sb-text);font-size:13px;font-weight:500;cursor:pointer;transition:background .1s,color .1s;user-select:none;border:none;background:none;width:100%;text-align:left}
+.sb-link:hover{background:var(--sb-hover);color:var(--sb-active-text)}
+.sb-link.active{background:var(--sb-active-bg);color:var(--sb-active-text)}
+.sb-link svg{opacity:.6;flex-shrink:0;width:16px;height:16px}
+.sb-link.active svg,.sb-link:hover svg{opacity:1}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--sb-border)}
+
+/* ── Page header ─────────────────────────────────────────────────── */
+.page-hd{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.page-hd-left{}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--text-1)}
+.page-sub{font-size:13px;color:var(--text-3);margin-top:3px}
+
+/* ── Stats grid ──────────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px}
+.stat-val{font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:var(--text-1);line-height:1}
+.stat-sub{font-size:11px;color:var(--text-3);margin-top:5px}
+.stat.accent{border-color:var(--primary);background:var(--primary-dim)}
+.stat.accent .stat-val{color:var(--primary)}
+.stat.success-card{border-color:var(--success);background:var(--success-dim)}
+.stat.success-card .stat-val{color:var(--success)}
+
+/* ── Cards / Panels ──────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.card-hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-1)}
+.card-body{padding:16px}
+
+/* ── Tables ──────────────────────────────────────────────────────── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--surface-2)}
+.td-mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-1)}
+.td-bold{font-weight:600;color:var(--text-1)}
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--r-full);font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.b-green{background:var(--success-dim);color:var(--success)}
+.b-red{background:var(--danger-dim);color:var(--danger)}
+.b-yellow{background:var(--warning-dim);color:var(--warning)}
+.b-blue{background:var(--primary-dim);color:var(--primary)}
+.b-gray{background:var(--surface-2);color:var(--text-3);border:1px solid var(--border)}
+.b-cyan{background:var(--info-dim);color:var(--info)}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);border:none;font-weight:600;font-size:13px;transition:opacity .15s,background .15s;white-space:nowrap}
+.btn:hover{opacity:.88}
+.btn:active{opacity:.75}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-ghost{background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--border);opacity:1}
+.btn-success{background:var(--success);color:#fff}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:4px}
+
+/* ── Forms ───────────────────────────────────────────────────────── */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text-2)}
+.form-input{padding:9px 11px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text-1);transition:border-color .15s}
+.form-input:focus{outline:none;border-color:var(--primary)}
+.form-input::placeholder{color:var(--text-3)}
+select.form-input option{background:var(--surface)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-hint{font-size:11px;color:var(--text-3);margin-top:2px}
+.form-error{font-size:12px;color:var(--danger);background:var(--danger-dim);padding:8px 10px;border-radius:var(--r-sm);margin-bottom:12px}
+
+/* ── Modal ───────────────────────────────────────────────────────── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--surface);border-radius:10px;box-shadow:var(--shadow-md);width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-hd{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text-3);cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px}
+.modal-close:hover{background:var(--surface-2)}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* ── Toasts ──────────────────────────────────────────────────────── */
+#toast-box{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:500;box-shadow:var(--shadow-md);animation:slide-in .2s ease;max-width:320px}
+@keyframes slide-in{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+.toast-success{background:#18773E;color:#fff}
+.toast-error{background:#B91C1C;color:#fff}
+.toast-info{background:var(--primary);color:#fff}
+
+/* ── Pipeline board ──────────────────────────────────────────────── */
+.pipeline{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px}
+.pipeline-col{flex:0 0 220px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.pipeline-col-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.pipeline-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.pipeline-card-title{font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:3px}
+.pipeline-card-sub{font-size:11px;color:var(--text-3)}
+.pipeline-card-price{font-size:13px;font-weight:700;color:var(--primary);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.pipeline-card-actions{margin-top:8px;display:flex;gap:4px;flex-wrap:wrap}
+
+/* ── Empty states ────────────────────────────────────────────────── */
+.empty{text-align:center;padding:40px 20px;color:var(--text-3)}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.4}
+.empty-text{font-size:14px}
+
+/* ── Misc ────────────────────────────────────────────────────────── */
+.flex{display:flex}
+.gap-2{gap:8px}
+.items-center{align-items:center}
+.justify-between{justify-content:space-between}
+.flex-wrap{flex-wrap:wrap}
+.mt-1{margin-top:4px}
+.mt-2{margin-top:8px}
+.mt-4{margin-top:16px}
+.mb-4{margin-bottom:16px}
+.text-sm{font-size:12px}
+.text-mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+.link-code{background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--info);word-break:break-all;max-width:200px;display:inline-block}
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ── New badge colors ────────────────────────────────────────────── */
+.b-orange{background:#FFF7ED;color:#C2410C}
+.b-purple{background:#F5F3FF;color:#6D28D9}
+.b-rose{background:#FDF2F8;color:#BE185D}
+
+/* ── Notification bell ───────────────────────────────────────────── */
+.notif-wrap{position:relative;display:inline-flex}
+.notif-bell{background:none;border:1px solid var(--sb-border);border-radius:6px;color:var(--sb-text);padding:6px 10px;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;transition:background .1s}
+.notif-bell:hover{background:var(--sb-hover)}
+.notif-badge{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;border-radius:9999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0 3px;font-family:'JetBrains Mono',monospace}
+
+/* ── Alert banner ────────────────────────────────────────────────── */
+.alert-banner{padding:10px 16px;border-radius:var(--r);font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.alert-banner-warn{background:var(--warning-dim);border:1px solid var(--warning);color:var(--warning)}
+.alert-banner-danger{background:var(--danger-dim);border:1px solid var(--danger);color:var(--danger)}
+.alert-banner-info{background:var(--info-dim);border:1px solid var(--info);color:var(--info)}
+
+/* ── Tabs ────────────────────────────────────────────────────────── */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:8px 14px;font-size:13px;font-weight:600;color:var(--text-3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .1s,border-color .1s}
+.tab:hover{color:var(--text-1)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ── Checklist ───────────────────────────────────────────────────── */
+.checklist{display:flex;flex-direction:column;gap:10px}
+.check-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface)}
+.check-item.done{border-color:var(--success);background:var(--success-dim)}
+.check-icon{font-size:18px;flex-shrink:0}
+.check-label{font-size:13px;font-weight:600;color:var(--text-1)}
+.check-sub{font-size:12px;color:var(--text-3);margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- Auth view -->
+<div id="auth">
+  <div class="auth-card">
+    <div class="auth-logo">CRM Afiliados</div>
+    <div class="auth-title">Iniciar sesión</div>
+    <div class="auth-sub">Accedé a tu panel personalizado</div>
+    <div id="auth-error" class="form-error hidden"></div>
+    <form id="login-form" onsubmit="doLogin(event)">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input id="inp-email" type="email" class="form-input" placeholder="tu@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input id="inp-pwd" type="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px">Ingresar</button>
+    </form>
+    <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--text-3)">
+      ¿Nuevo vendedor? <a href="#" onclick="showRegister()">Crear cuenta</a>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;color:var(--text-3);text-align:center">
+      <strong style="color:var(--text-2)">Demo:</strong> admin@crm.com · Admin123! &nbsp;|&nbsp; carlos@ventas.com · Vendor123!
+    </div>
+  </div>
+</div>
+
+<!-- Register view -->
+<div id="register" class="hidden">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:16px">
+    <div class="auth-card" style="max-width:460px">
+      <div class="auth-logo">CRM Afiliados</div>
+      <div class="auth-title">Registrarse como vendedor</div>
+      <div class="auth-sub">Tu cuenta será activada por el administrador</div>
+      <div id="reg-error" class="form-error hidden"></div>
+      <form id="reg-form" onsubmit="doRegister(event)">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nombre completo</label><input id="rn" class="form-input" placeholder="Ana García" required></div>
+          <div class="form-group"><label class="form-label">Teléfono</label><input id="rp" class="form-input" placeholder="+54 11 0000-0000"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label><input id="re" type="email" class="form-input" required placeholder="ana@mail.com"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label><input id="rpwd" type="password" class="form-input" required placeholder="Mín. 8 chars, 1 mayúscula, 1 número"><div class="form-hint">Ej: Ventas2026!</div></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Enviar solicitud</button>
+      </form>
+      <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--text-3)"><a href="#" onclick="showLogin()">← Volver al login</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- App shell -->
+<div id="app" class="hidden">
+  <aside id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-label">CRM</div>
+      <div class="sb-brand-name">Red de Afiliados</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-name" id="sb-name">—</div>
+      <div class="sb-user-role" id="sb-role">—</div>
+    </div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-footer" style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="notif-wrap">
+          <button class="notif-bell" onclick="navigate('notifications')" id="notif-btn">🔔 Notificaciones <span id="notif-count" style="display:none" class="notif-badge">0</span></button>
+        </div>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </aside>
+  <main id="main">
+    <div class="page" id="content"><!-- views render here --></div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="hidden">
+  <div class="modal-box">
+    <div class="modal-hd"><span class="modal-title" id="modal-title"></span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div id="toast-box"></div>
+
+<script>
+// ── Utilities ──────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const uid = () => crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)+Date.now().toString(36);
+const now = () => new Date().toISOString().slice(0,19).replace('T',' ');
+const fmt = n => Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate = s => s ? s.slice(0,10) : '—';
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  $('toast-box').prepend(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openModal(title, bodyHtml) {
+  $('modal-title').textContent = title;
+  $('modal-body').innerHTML = bodyHtml;
+  $('modal-overlay').classList.remove('hidden');
+}
+function closeModal() { $('modal-overlay').classList.add('hidden'); }
+$('modal-overlay').addEventListener('click', e => { if(e.target===$('modal-overlay')) closeModal(); });
+
+// ── LocalStorage DB ────────────────────────────────────────────────────────
+const DB = {
+  _get(k) { try { return JSON.parse(localStorage.getItem('crm.'+k)||'[]'); } catch{return [];} },
+  _set(k,v) { localStorage.setItem('crm.'+k, JSON.stringify(v)); },
+  all(k) { return this._get(k); },
+  find(k,fn) { return this._get(k).filter(fn); },
+  one(k,fn) { return this._get(k).find(fn); },
+  insert(k,obj) { const a=this._get(k); a.push(obj); this._set(k,a); return obj; },
+  update(k,id,changes) {
+    const a=this._get(k); const i=a.findIndex(x=>x.id===id);
+    if(i>=0){ a[i]={...a[i],...changes}; this._set(k,a); return a[i]; }
+  },
+  remove(k,id) { this._set(k, this._get(k).filter(x=>x.id!==id)); },
+  clear(k) { this._set(k,[]); }
+};
+
+// ── Session ────────────────────────────────────────────────────────────────
+let SESSION = null;
+try { SESSION = JSON.parse(sessionStorage.getItem('crm_sess')); } catch{}
+
+function setSession(user) {
+  SESSION = user;
+  sessionStorage.setItem('crm_sess', JSON.stringify(user));
+}
+function clearSession() { SESSION=null; sessionStorage.removeItem('crm_sess'); }
+
+// ── Auth logic ─────────────────────────────────────────────────────────────
+async function doLogin(e) {
+  e.preventDefault();
+  const email = $('inp-email').value.toLowerCase().trim();
+  const pwd = $('inp-pwd').value;
+  $('auth-error').classList.add('hidden');
+
+  const user = DB.one('users', u => u.email === email);
+  if (!user) { showAuthError('Credenciales incorrectas'); return; }
+
+  const hash = await sha256(pwd);
+  if (user.pwdHash !== hash) { showAuthError('Credenciales incorrectas'); return; }
+  if (user.status === 'PENDING') { showAuthError('Cuenta pendiente de aprobación por el administrador'); return; }
+  if (user.status !== 'ACTIVE') { showAuthError('Cuenta inactiva o suspendida'); return; }
+
+  DB.update('users', user.id, { lastLogin: now() });
+  setSession({ id:user.id, email:user.email, role:user.role, fullName:user.fullName });
+  boot();
+}
+
+async function doRegister(e) {
+  e.preventDefault();
+  const fullName=$('rn').value.trim(), phone=$('rp').value.trim(), email=$('re').value.toLowerCase().trim(), pwd=$('rpwd').value;
+  $('reg-error').classList.add('hidden');
+
+  if (!/(?=.*[A-Z])(?=.*\d).{8,}/.test(pwd)) { showRegError('La contraseña debe tener al menos 8 caracteres, 1 mayúscula y 1 número'); return; }
+  if (DB.one('users', u => u.email === email)) { showRegError('Ese email ya está registrado'); return; }
+
+  const pwdHash = await sha256(pwd);
+  DB.insert('users', { id:uid(), email, pwdHash, role:'VENDOR', status:'PENDING', fullName, phone, createdAt:now(), approvedBy:null, approvedAt:null, lastLogin:null });
+  toast('Solicitud enviada. El admin aprobará tu cuenta.', 'success');
+  showLogin();
+}
+
+function showAuthError(msg) { const el=$('auth-error'); el.textContent=msg; el.classList.remove('hidden'); }
+function showRegError(msg) { const el=$('reg-error'); el.textContent=msg; el.classList.remove('hidden'); }
+
+function showRegister() {
+  $('auth').classList.add('hidden');
+  $('register').classList.remove('hidden');
+}
+function showLogin() {
+  $('register').classList.add('hidden');
+  $('auth').classList.remove('hidden');
+  $('auth').style.display='flex';
+}
+function logout() { clearSession(); $('app').classList.add('hidden'); $('auth').classList.remove('hidden'); $('auth').style.display='flex'; }
+
+// ── Seed data ──────────────────────────────────────────────────────────────
+async function seedIfEmpty() {
+  if (DB.all('users').length > 0) return;
+
+  const adminId = uid(), vendorId = uid(), v2Id = uid();
+  const adminHash = await sha256('Admin123!');
+  const vendorHash = await sha256('Vendor123!');
+
+  DB.insert('users', { id:adminId, email:'admin@crm.com', pwdHash:adminHash, role:'ADMIN', status:'ACTIVE', fullName:'Administrador', phone:null, createdAt:now(), approvedBy:null, approvedAt:now(), lastLogin:null });
+  DB.insert('users', { id:vendorId, email:'carlos@ventas.com', pwdHash:vendorHash, role:'VENDOR', status:'ACTIVE', fullName:'Carlos López', phone:'+54 11 9876-5432', createdAt:now(), approvedBy:adminId, approvedAt:now(), lastLogin:null });
+  DB.insert('users', { id:v2Id, email:'vendedor@ejemplo.com', pwdHash:vendorHash, role:'VENDOR', status:'PENDING', fullName:'María García', phone:'+54 11 1234-5678', createdAt:now(), approvedBy:null, approvedAt:null, lastLogin:null });
+
+  const cats = ['Mercado','Financiero','Legal'];
+  const prods = [
+    { id:uid(), name:'Informe de Mercado Inmobiliario Q3 2026', desc:'Análisis del mercado inmobiliario argentino. Tendencias, precios por zona y proyecciones.', cat:'Mercado', price:850, status:'ACTIVE' },
+    { id:uid(), name:'Reporte de Riesgo Crediticio Corporativo', desc:'Evaluación de riesgo para PyMEs. Incluye historial crediticio, juicios y calificación.', cat:'Financiero', price:1200, status:'ACTIVE' },
+    { id:uid(), name:'Due Diligence Societario Completo', desc:'Verificación de antecedentes societarios, judiciales y registrales de persona jurídica.', cat:'Legal', price:2500, status:'ACTIVE' },
+    { id:uid(), name:'Análisis Competitivo — Sector Retail', desc:'Mapeo competitivo, participación de mercado y benchmarking para retail.', cat:'Mercado', price:1500, status:'ACTIVE' },
+    { id:uid(), name:'Informe Patrimonial de Persona Física', desc:'Análisis de bienes, deudas y situación crediticia de una persona física.', cat:'Financiero', price:600, status:'INACTIVE' },
+  ];
+  prods.forEach(p => {
+    DB.insert('products', { id:p.id, name:p.name, description:p.desc, category:p.cat, currentPrice:p.price, status:p.status, internalNotes:'Entrega en 48hs hábiles vía email cifrado.', createdAt:now(), updatedAt:now() });
+    DB.insert('priceHistory', { id:uid(), productId:p.id, oldPrice:null, newPrice:p.price, changedBy:adminId, changedAt:now(), reason:'Precio inicial' });
+  });
+
+  // Seed affiliate links for Carlos
+  const activeProds = prods.filter(p=>p.status==='ACTIVE').slice(0,3);
+  const linkIds = activeProds.map(p => {
+    const id=uid(), code=genCode();
+    DB.insert('affiliateLinks', { id, vendorId, productId:p.id, code, isActive:true, createdAt:now() });
+    return { id, productId:p.id, code };
+  });
+
+  // Seed some clients for Carlos
+  const clients = [
+    { id:uid(), fullName:'Empresa Rodríguez SRL', email:'compras@rodriguez.com', phone:'+54 341 555-0101', originVendorId:vendorId, notes:'Interesados en informes de mercado', createdAt:now() },
+    { id:uid(), fullName:'Martín Pereyra', email:'martin.p@gmail.com', phone:'+54 11 555-2233', originVendorId:vendorId, notes:'Abogado. Busca due diligence para un cliente.', createdAt:now() },
+    { id:uid(), fullName:'Inversiones Patagonia SA', email:'finanzas@patagonia.com.ar', phone:'+54 294 555-9999', originVendorId:vendorId, notes:'Gran empresa, potencial para varios informes', createdAt:now() },
+  ];
+  clients.forEach(c => DB.insert('clients', c));
+
+  // Seed some orders
+  const orders = [
+    { clientIdx:0, productIdx:0, status:'ENTREGADO', price:850 },
+    { clientIdx:1, productIdx:2, status:'PAGADO', price:2500 },
+    { clientIdx:2, productIdx:1, status:'PROPUESTA_ENVIADA', price:1200 },
+    { clientIdx:0, productIdx:1, status:'PROSPECTO', price:1200 },
+  ];
+
+  orders.forEach((o,i) => {
+    const ordId = uid();
+    const client = clients[o.clientIdx];
+    const prod = activeProds[Math.min(o.productIdx, activeProds.length-1)];
+    const link = linkIds.find(l=>l.productId===prod.id);
+
+    const order = {
+      id:ordId, clientId:client.id, productId:prod.id, vendorId, status:o.status,
+      agreedPrice:o.price, saleId:null, vendorNotes:'', proposalSentAt:null,
+      paidAt:null, deliveredAt:null, createdAt:now()
+    };
+
+    if (o.status === 'PROPUESTA_ENVIADA' || o.status === 'PAGADO' || o.status === 'ENTREGADO') {
+      order.proposalSentAt = now();
+    }
+
+    if (o.status === 'PAGADO' || o.status === 'ENTREGADO') {
+      order.paidAt = now();
+      const saleId = uid();
+      order.saleId = saleId;
+      DB.insert('sales', { id:saleId, affiliateLinkId:link?.id||null, vendorId, productId:prod.id, clientId:client.id, salePrice:o.price, status:'CONFIRMED', attributedAt:now() });
+      const commId = uid();
+      DB.insert('commissions', { id:commId, saleId, vendorId, rate:0.15, amount:Math.round(o.price*0.15*100)/100, status: o.status==='ENTREGADO'?'PAID':'PENDING', paidAt:o.status==='ENTREGADO'?now():null, paymentRef:null });
+    }
+
+    if (o.status === 'ENTREGADO') order.deliveredAt = now();
+    DB.insert('orders', order);
+  });
+}
+
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:10}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+const ADMIN_NAV = [
+  { id:'dashboard', label:'Panel principal', icon:'⊞' },
+  { id:'vendors', label:'Vendedores', icon:'◉' },
+  { id:'products', label:'Catálogo', icon:'▦' },
+  { id:'orders', label:'Pedidos', icon:'⊡' },
+  { id:'commissions', label:'Comisiones', icon:'◈' },
+  { id:'commrules', label:'Reglas de comisión', icon:'⚙' },
+  { id:'reporting', label:'Reportes', icon:'▤' },
+  { id:'fraud', label:'Anti-fraude', icon:'⚑' },
+];
+const VENDOR_NAV = [
+  { id:'dashboard', label:'Mi panel', icon:'⊞' },
+  { id:'catalog', label:'Catálogo', icon:'▦' },
+  { id:'links', label:'Mis links', icon:'⊕' },
+  { id:'pipeline', label:'Pipeline', icon:'⊡' },
+  { id:'mycommissions', label:'Comisiones', icon:'◈' },
+  { id:'fiscal', label:'Mi perfil fiscal', icon:'◎' },
+];
+
+let currentView = 'dashboard';
+
+function buildNav(role) {
+  const nav = role === 'ADMIN' ? ADMIN_NAV : VENDOR_NAV;
+  $('sb-nav').innerHTML = nav.map(n => `
+    <button class="sb-link${currentView===n.id?' active':''}" onclick="navigate('${n.id}')">
+      <span style="font-size:15px">${n.icon}</span>${esc(n.label)}
+    </button>
+  `).join('');
+}
+
+function navigate(view) {
+  currentView = view;
+  buildNav(SESSION.role);
+  render();
+}
+
+async function render() {
+  const v = currentView;
+  const r = SESSION.role;
+  updateNotifBell();
+  try {
+    if (v==='dashboard') await viewDashboard();
+    else if (v==='vendors' && r==='ADMIN') await viewVendors();
+    else if (v==='products' && r==='ADMIN') await viewProducts();
+    else if (v==='orders' && r==='ADMIN') await viewAllOrders();
+    else if (v==='commissions' && r==='ADMIN') await viewAllCommissions();
+    else if (v==='commrules' && r==='ADMIN') await viewCommRules();
+    else if (v==='reporting' && r==='ADMIN') await viewReporting();
+    else if (v==='fraud' && r==='ADMIN') await viewFraudAlerts();
+    else if (v==='catalog' && r==='VENDOR') await viewCatalog();
+    else if (v==='links' && r==='VENDOR') await viewLinks();
+    else if (v==='pipeline' && r==='VENDOR') await viewPipeline();
+    else if (v==='mycommissions' && r==='VENDOR') await viewMyCommissions();
+    else if (v==='fiscal' && r==='VENDOR') await viewFiscalProfile();
+    else if (v==='notifications') await viewNotifications();
+    else await viewDashboard();
+  } catch(e) { console.error(e); $('content').innerHTML = `<div class="empty"><div class="empty-icon">⚠</div><div class="empty-text">${e.message}</div></div>`; }
+}
+
+// ── VIEWS ──────────────────────────────────────────────────────────────────
+
+async function viewDashboard() {
+  const isAdmin = SESSION.role === 'ADMIN';
+  let html = `<div class="page-hd"><div class="page-hd-left"><div class="page-title">Panel principal</div><div class="page-sub">Bienvenido, ${esc(SESSION.fullName)}</div></div></div>`;
+
+  if (isAdmin) {
+    const vendors = DB.all('users').filter(u=>u.role==='VENDOR');
+    const orders = DB.all('orders');
+    const sales = DB.all('sales').filter(s=>s.status==='CONFIRMED');
+    const comms = DB.all('commissions');
+    const revenue = sales.reduce((s,x)=>s+x.salePrice,0);
+    const pendingComm = comms.filter(c=>['PENDING','RETENIDA','LIBERADA'].includes(c.status)).reduce((s,x)=>s+x.amount,0);
+    const liberadaComm = comms.filter(c=>c.status==='LIBERADA').reduce((s,x)=>s+x.amount,0);
+    const paidComm = comms.filter(c=>c.status==='PAID').reduce((s,x)=>s+x.amount,0);
+    const openAlerts = DB.find('fraudAlerts',a=>a.status==='OPEN').length;
+
+    html += `<div class="stats">
+      <div class="stat"><div class="stat-label">Vendedores activos</div><div class="stat-val">${vendors.filter(v=>v.status==='ACTIVE').length}</div>${vendors.filter(v=>v.status==='PENDING').length>0?`<div class="stat-sub" style="color:var(--warning)">${vendors.filter(v=>v.status==='PENDING').length} pendiente(s) de aprobación</div>`:''}</div>
+      <div class="stat"><div class="stat-label">Productos activos</div><div class="stat-val">${DB.all('products').filter(p=>p.status==='ACTIVE').length}</div></div>
+      <div class="stat"><div class="stat-label">Pedidos totales</div><div class="stat-val">${orders.length}</div><div class="stat-sub">${orders.filter(o=>['PAGADO','ENTREGADO'].includes(o.status)).length} pagados</div></div>
+      <div class="stat accent"><div class="stat-label">Ingresos totales</div><div class="stat-val">$${fmt(revenue)}</div></div>
+      <div class="stat"><div class="stat-label">En retención/liberada</div><div class="stat-val">$${fmt(pendingComm)}</div><div class="stat-sub">${liberadaComm>0?`$${fmt(liberadaComm)} a pagar`:''}</div></div>
+      <div class="stat success-card"><div class="stat-label">Comisiones pagadas</div><div class="stat-val">$${fmt(paidComm)}</div></div>
+      ${openAlerts>0?`<div class="stat" style="border-color:var(--danger);background:var(--danger-dim)"><div class="stat-label" style="color:var(--danger)">Alertas fraude</div><div class="stat-val" style="color:var(--danger)">${openAlerts}</div><div class="stat-sub" style="color:var(--danger)"><a href="#" onclick="navigate('fraud')">Ver alertas →</a></div></div>`:''}
+    </div>`;
+
+    if (vendors.filter(v=>v.status==='PENDING').length > 0) {
+      html += `<div class="card mb-4" style="border-color:var(--warning);margin-bottom:20px">
+        <div class="card-hd" style="background:var(--warning-dim)"><span class="card-title" style="color:var(--warning)">⚠ Vendedores pendientes de aprobación</span><button class="btn btn-sm btn-ghost" onclick="navigate('vendors')">Ver todos →</button></div>
+        <div class="card-body">
+        ${vendors.filter(v=>v.status==='PENDING').map(v=>`
+          <div class="flex items-center justify-between gap-2 flex-wrap" style="padding:6px 0;border-bottom:1px solid var(--border)">
+            <div><strong>${esc(v.fullName)}</strong> <span style="color:var(--text-3);font-size:12px">${esc(v.email)}</span></div>
+            <div class="flex gap-2"><button class="btn btn-xs btn-success" onclick="approveVendor('${v.id}')">Aprobar</button><button class="btn btn-xs btn-danger" onclick="rejectVendor('${v.id}')">Rechazar</button></div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    const recentOrders = orders.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,5);
+    if (recentOrders.length > 0) {
+      html += `<div class="card"><div class="card-hd"><span class="card-title">Últimos pedidos</span><button class="btn btn-sm btn-ghost" onclick="navigate('orders')">Ver todos →</button></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Producto</th><th>Vendedor</th><th>Estado</th><th>Precio</th></tr></thead><tbody>`;
+      recentOrders.forEach(o => {
+        const cl = DB.one('clients', c=>c.id===o.clientId);
+        const pr = DB.one('products', p=>p.id===o.productId);
+        const vn = DB.one('users', u=>u.id===o.vendorId);
+        html += `<tr><td class="td-bold">${esc(cl?.fullName||'—')}</td><td>${esc(pr?.name||'—')}</td><td>${esc(vn?.fullName||'—')}</td><td>${statusBadge(o.status)}</td><td class="td-mono">$${fmt(o.agreedPrice)}</td></tr>`;
+      });
+      html += `</tbody></table></div></div>`;
+    }
+  } else {
+    const myOrders = DB.find('orders', o=>o.vendorId===SESSION.id);
+    const myClients = DB.find('clients', c=>c.originVendorId===SESSION.id);
+    const myLinks = DB.find('affiliateLinks', l=>l.vendorId===SESSION.id&&l.isActive);
+    const myComms = DB.find('commissions', c=>c.vendorId===SESSION.id);
+    const pendingComm = myComms.filter(c=>['PENDING','RETENIDA','LIBERADA'].includes(c.status)).reduce((s,x)=>s+x.amount,0);
+    const liberadaComm = myComms.filter(c=>c.status==='LIBERADA').reduce((s,x)=>s+x.amount,0);
+    const paidComm = myComms.filter(c=>c.status==='PAID').reduce((s,x)=>s+x.amount,0);
+
+    html += vendorOnboardingBanner();
+
+    html += `<div class="stats">
+      <div class="stat"><div class="stat-label">Clientes</div><div class="stat-val">${myClients.length}</div></div>
+      <div class="stat"><div class="stat-label">Pedidos activos</div><div class="stat-val">${myOrders.filter(o=>!['ENTREGADO','REEMBOLSADO'].includes(o.status)).length}</div></div>
+      <div class="stat"><div class="stat-label">Links activos</div><div class="stat-val">${myLinks.length}</div></div>
+      <div class="stat accent"><div class="stat-label">En retención</div><div class="stat-val">$${fmt(pendingComm)}</div></div>
+      ${liberadaComm>0?`<div class="stat" style="border-color:var(--m11,#6D28D9)"><div class="stat-label">A cobrar (liberada)</div><div class="stat-val" style="color:var(--m11,#6D28D9)">$${fmt(liberadaComm)}</div></div>`:''}
+      <div class="stat success-card"><div class="stat-label">Total cobrado</div><div class="stat-val">$${fmt(paidComm)}</div></div>
+    </div>`;
+
+    const activeOrders = myOrders.filter(o=>!['ENTREGADO','REEMBOLSADO'].includes(o.status)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,5);
+    if (activeOrders.length) {
+      html += `<div class="card"><div class="card-hd"><span class="card-title">Pedidos activos</span><button class="btn btn-sm btn-ghost" onclick="navigate('pipeline')">Ver pipeline →</button></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Producto</th><th>Estado</th><th>Precio</th></tr></thead><tbody>`;
+      activeOrders.forEach(o=>{
+        const cl=DB.one('clients',c=>c.id===o.clientId);
+        const pr=DB.one('products',p=>p.id===o.productId);
+        html+=`<tr><td class="td-bold">${esc(cl?.fullName||'—')}</td><td>${esc(pr?.name||'—')}</td><td>${statusBadge(o.status)}</td><td class="td-mono">$${fmt(o.agreedPrice)}</td></tr>`;
+      });
+      html+=`</tbody></table></div></div>`;
+    } else {
+      html += `<div class="card"><div class="card-body empty"><div class="empty-icon">⊡</div><div class="empty-text">No tenés pedidos activos. <a href="#" onclick="navigate('pipeline')">Agregar prospecto →</a></div></div></div>`;
+    }
+  }
+
+  $('content').innerHTML = html;
+}
+
+// ── ADMIN: Vendors ─────────────────────────────────────────────────────────
+async function viewVendors() {
+  const vendors = DB.find('users', u=>u.role==='VENDOR').sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  let html = `<div class="page-hd"><div class="page-hd-left"><div class="page-title">Vendedores</div><div class="page-sub">Gestión de cuentas de afiliados</div></div><button class="btn btn-primary" onclick="openNewVendorModal()">+ Nuevo vendedor</button></div>`;
+  html += `<div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Estado</th><th>Registro</th><th>Pedidos</th><th>Acciones</th></tr></thead><tbody>`;
+  if (!vendors.length) { html += `<tr><td colspan="7" class="empty">No hay vendedores registrados</td></tr>`; }
+  vendors.forEach(v => {
+    const orderCount = DB.find('orders', o=>o.vendorId===v.id).length;
+    html += `<tr>
+      <td class="td-bold">${esc(v.fullName)}</td>
+      <td>${esc(v.email)}</td>
+      <td>${esc(v.phone||'—')}</td>
+      <td>${vendorStatusBadge(v.status)}</td>
+      <td class="td-mono">${fmtDate(v.createdAt)}</td>
+      <td>${orderCount}</td>
+      <td><div class="flex gap-2">
+        ${v.status==='PENDING'?`<button class="btn btn-xs btn-success" onclick="approveVendor('${v.id}')">Aprobar</button><button class="btn btn-xs btn-danger" onclick="rejectVendor('${v.id}')">Rechazar</button>`:''}
+        ${v.status==='ACTIVE'?`<button class="btn btn-xs btn-ghost" onclick="suspendVendor('${v.id}')">Suspender</button>`:''}
+        ${v.status==='SUSPENDED'||v.status==='INACTIVE'?`<button class="btn btn-xs btn-success" onclick="activateVendor('${v.id}')">Activar</button>`:''}
+      </div></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  $('content').innerHTML = html;
+}
+
+function approveVendor(id) {
+  DB.update('users', id, { status:'ACTIVE', approvedBy:SESSION.id, approvedAt:now() });
+  addNotification(id,'ACCOUNT_APPROVED','✓ Cuenta aprobada','Tu cuenta de vendedor fue aprobada. Ya podés ingresar al sistema.','user',id);
+  toast('Vendedor aprobado', 'success');
+  render();
+}
+function rejectVendor(id) {
+  DB.update('users', id, { status:'INACTIVE' });
+  toast('Cuenta rechazada', 'info');
+  render();
+}
+function suspendVendor(id) {
+  DB.update('users', id, { status:'SUSPENDED' });
+  toast('Vendedor suspendido');
+  render();
+}
+function activateVendor(id) {
+  DB.update('users', id, { status:'ACTIVE', approvedBy:SESSION.id, approvedAt:now() });
+  toast('Vendedor activado', 'success');
+  render();
+}
+
+function openNewVendorModal() {
+  openModal('Nuevo vendedor', `
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre completo</label><input id="nv-name" class="form-input" placeholder="Nombre Apellido"></div>
+      <div class="form-group"><label class="form-label">Email</label><input id="nv-email" class="form-input" type="email" placeholder="email@ejemplo.com"></div>
+      <div class="form-group"><label class="form-label">Teléfono</label><input id="nv-phone" class="form-input" placeholder="+54 11 1234-5678"></div>
+      <div class="form-group"><label class="form-label">Contraseña</label><input id="nv-pwd" class="form-input" type="password" placeholder="Mínimo 6 caracteres"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNewVendor()">Crear vendedor</button>
+    </div>`);
+}
+async function saveNewVendor() {
+  const name = $('nv-name').value.trim();
+  const email = $('nv-email').value.trim().toLowerCase();
+  const phone = $('nv-phone').value.trim();
+  const pwd = $('nv-pwd').value;
+  if (!name || !email || !pwd) { toast('Nombre, email y contraseña son obligatorios', 'error'); return; }
+  if (pwd.length < 6) { toast('La contraseña debe tener al menos 6 caracteres', 'error'); return; }
+  if (DB.one('users', u=>u.email===email)) { toast('Ya existe un usuario con ese email', 'error'); return; }
+  const pwdHash = await sha256(pwd);
+  DB.insert('users', { id:uid(), email, pwdHash, role:'VENDOR', status:'ACTIVE', fullName:name, phone:phone||null, createdAt:now(), approvedBy:SESSION.id, approvedAt:now(), lastLogin:null });
+  closeModal();
+  toast('Vendedor creado y activo', 'success');
+  render();
+}
+
+// ── ADMIN: Products ────────────────────────────────────────────────────────
+async function viewProducts() {
+  const products = DB.all('products').sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  let html = `<div class="page-hd"><div class="page-hd-left"><div class="page-title">Catálogo de productos</div><div class="page-sub">Gestión de reportes e informes</div></div><button class="btn btn-primary" onclick="openAddProduct()">+ Nuevo producto</button></div>`;
+  html += `<div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead><tbody>`;
+  if (!products.length) { html += `<tr><td colspan="6" class="empty">No hay productos</td></tr>`; }
+  products.forEach(p => {
+    html += `<tr>
+      <td><div class="td-bold">${esc(p.name)}</div><div class="text-sm" style="color:var(--text-3);margin-top:2px">${esc(p.description?.slice(0,60)||'')}</div></td>
+      <td><span class="badge b-gray">${esc(p.category||'—')}</span></td>
+      <td class="td-mono">$${fmt(p.currentPrice)}</td>
+      <td>${productStatusBadge(p.status)}</td>
+      <td class="td-mono">${fmtDate(p.createdAt)}</td>
+      <td><div class="flex gap-2">
+        <button class="btn btn-xs btn-ghost" onclick="openEditProduct('${p.id}')">Editar</button>
+        ${p.status!=='ARCHIVED'?`<button class="btn btn-xs btn-danger" onclick="archiveProduct('${p.id}')">Archivar</button>`:''}
+        <button class="btn btn-xs btn-ghost" onclick="viewPriceHistory('${p.id}')">Historial</button>
+      </div></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  $('content').innerHTML = html;
+}
+
+function openAddProduct() {
+  openModal('Nuevo producto', `
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre</label><input id="pn" class="form-input" placeholder="Nombre del reporte" required></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea id="pd" class="form-input" rows="2" placeholder="Descripción para vendedores"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Categoría</label><select id="pc" class="form-input"><option>Mercado</option><option>Financiero</option><option>Legal</option><option>Otro</option></select></div>
+        <div class="form-group"><label class="form-label">Precio (USD)</label><input id="pp" type="number" min="0" step="0.01" class="form-input" placeholder="0.00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Estado</label><select id="ps" class="form-input"><option value="ACTIVE">Activo</option><option value="INACTIVE">Inactivo</option></select></div>
+        <div class="form-group"><label class="form-label">Notas internas</label><input id="pin" class="form-input" placeholder="Solo visible para admin"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveProduct()">Crear producto</button></div>
+  `);
+}
+
+function saveProduct() {
+  const name=$('pn').value.trim(), desc=$('pd').value.trim(), cat=$('pc').value, price=parseFloat($('pp').value), status=$('ps').value, notes=$('pin').value.trim();
+  if (!name||!price) { toast('Nombre y precio son requeridos','error'); return; }
+  const id=uid();
+  DB.insert('products',{id,name,description:desc,category:cat,currentPrice:price,status,internalNotes:notes,createdAt:now(),updatedAt:now()});
+  DB.insert('priceHistory',{id:uid(),productId:id,oldPrice:null,newPrice:price,changedBy:SESSION.id,changedAt:now(),reason:'Precio inicial'});
+  closeModal(); toast('Producto creado','success'); render();
+}
+
+function openEditProduct(id) {
+  const p=DB.one('products',x=>x.id===id);
+  if(!p)return;
+  openModal('Editar producto', `
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre</label><input id="ep-name" class="form-input" value="${esc(p.name)}"></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea id="ep-desc" class="form-input" rows="2">${esc(p.description||'')}</textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Categoría</label><select id="ep-cat" class="form-input"><option${p.category==='Mercado'?' selected':''}>Mercado</option><option${p.category==='Financiero'?' selected':''}>Financiero</option><option${p.category==='Legal'?' selected':''}>Legal</option><option${!['Mercado','Financiero','Legal'].includes(p.category)?' selected':''}>Otro</option></select></div>
+        <div class="form-group"><label class="form-label">Precio (USD)</label><input id="ep-price" type="number" min="0" step="0.01" class="form-input" value="${p.currentPrice}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Motivo del cambio de precio (si aplica)</label><input id="ep-reason" class="form-input" placeholder="Ej: Actualización por inflación"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Estado</label><select id="ep-status" class="form-input"><option value="ACTIVE"${p.status==='ACTIVE'?' selected':''}>Activo</option><option value="INACTIVE"${p.status==='INACTIVE'?' selected':''}>Inactivo</option></select></div>
+        <div class="form-group"><label class="form-label">Notas internas</label><input id="ep-notes" class="form-input" value="${esc(p.internalNotes||'')}"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="updateProduct('${id}',${p.currentPrice})">Guardar cambios</button></div>
+  `);
+}
+
+function updateProduct(id, oldPrice) {
+  const name=$('ep-name').value.trim(), desc=$('ep-desc').value.trim(), cat=$('ep-cat').value;
+  const price=parseFloat($('ep-price').value), reason=$('ep-reason').value.trim();
+  const status=$('ep-status').value, notes=$('ep-notes').value.trim();
+  if(!name||!price){toast('Datos requeridos','error');return;}
+  if(price!==oldPrice) DB.insert('priceHistory',{id:uid(),productId:id,oldPrice,newPrice:price,changedBy:SESSION.id,changedAt:now(),reason:reason||null});
+  DB.update('products',id,{name,description:desc,category:cat,currentPrice:price,status,internalNotes:notes,updatedAt:now()});
+  closeModal(); toast('Producto actualizado','success'); render();
+}
+
+function archiveProduct(id) {
+  if(!confirm('¿Archivar este producto? No podrá reactivarse.'))return;
+  DB.update('products',id,{status:'ARCHIVED',updatedAt:now()});
+  toast('Producto archivado'); render();
+}
+
+function viewPriceHistory(id) {
+  const p=DB.one('products',x=>x.id===id);
+  const hist=DB.find('priceHistory',h=>h.productId===id).sort((a,b)=>b.changedAt.localeCompare(a.changedAt));
+  const rows=hist.map(h=>{
+    const u=DB.one('users',x=>x.id===h.changedBy);
+    return `<tr><td class="td-mono">${h.changedAt.slice(0,10)}</td><td class="td-mono">${h.oldPrice!=null?'$'+fmt(h.oldPrice):'—'}</td><td class="td-mono" style="color:var(--primary)">$${fmt(h.newPrice)}</td><td>${esc(u?.fullName||'—')}</td><td>${esc(h.reason||'—')}</td></tr>`;
+  }).join('');
+  openModal(`Historial de precios — ${p?.name||''}`,`<div class="modal-body"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Precio ant.</th><th>Nuevo precio</th><th>Modificado por</th><th>Motivo</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="empty">Sin historial</td></tr>'}</tbody></table></div></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cerrar</button></div>`);
+}
+
+// ── ADMIN: All Orders ──────────────────────────────────────────────────────
+async function viewAllOrders() {
+  const orders = DB.all('orders').sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  let html = `<div class="page-hd"><div class="page-hd-left"><div class="page-title">Pedidos</div><div class="page-sub">Todos los pedidos del sistema</div></div></div>`;
+  html += `<div class="card"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Producto</th><th>Vendedor</th><th>Estado</th><th>Precio</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>`;
+  if(!orders.length){html+=`<tr><td colspan="7" class="empty">No hay pedidos</td></tr>`;}
+  orders.forEach(o=>{
+    const cl=DB.one('clients',c=>c.id===o.clientId);
+    const pr=DB.one('products',p=>p.id===o.productId);
+    const vn=DB.one('users',u=>u.id===o.vendorId);
+    const canPay = o.status==='PROPUESTA_ENVIADA';
+    const canDeliver = o.status==='PAGADO';
+    const canRefund = ['PAGADO','ENTREGADO'].includes(o.status);
+    html+=`<tr>
+      <td class="td-bold">${esc(cl?.fullName||'—')}</td>
+      <td>${esc(pr?.name||'—')}</td>
+      <td><span class="badge b-gray">${esc(vn?.fullName||'—')}</span></td>
+      <td>${statusBadge(o.status)}</td>
+      <td class="td-mono">$${fmt(o.agreedPrice)}</td>
+      <td class="td-mono">${fmtDate(o.createdAt)}</td>
+      <td><div class="flex gap-2">
+        ${canPay?`<button class="btn btn-xs btn-success" onclick="advanceOrder('${o.id}','PAGADO')">Confirmar pago</button>`:''}
+        ${canDeliver?`<button class="btn btn-xs btn-primary" onclick="advanceOrder('${o.id}','ENTREGADO')">→ Entregado</button>`:''}
+        ${canRefund?`<button class="btn btn-xs btn-danger" onclick="refundOrder('${o.id}')">Reembolsar</button>`:''}
+      </div></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  $('content').innerHTML=html;
+}
+
+// ── ADMIN: All Commissions ─────────────────────────────────────────────────
+async function viewAllCommissions() {
+  const comms=DB.all('commissions').sort((a,b)=>{
+    const sa=DB.one('sales',s=>s.id===a.saleId), sb=DB.one('sales',s=>s.id===b.saleId);
+    return (sb?.attributedAt||'').localeCompare(sa?.attributedAt||'');
+  });
+  const pendingAmt=comms.filter(c=>['RETENIDA','LIBERADA','PENDING','APPROVED'].includes(c.status)).reduce((s,x)=>s+x.amount,0);
+  const liberadaAmt=comms.filter(c=>c.status==='LIBERADA').reduce((s,x)=>s+x.amount,0);
+  const n=now();
+  const vencidasCount=comms.filter(c=>c.status==='RETENIDA'&&c.releaseAt&&c.releaseAt<=n).length;
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Comisiones</div><div class="page-sub">Gestión de pagos a vendedores</div></div>
+    <div class="flex gap-2 flex-wrap">
+      ${vencidasCount>0?`<button class="btn btn-primary btn-sm" onclick="liberarVencidas()">Liberar ${vencidasCount} vencida(s)</button>`:''}
+      <div class="badge b-yellow" style="font-size:13px;padding:6px 14px">Pendiente: $${fmt(pendingAmt)}</div>
+      ${liberadaAmt>0?`<div class="badge b-purple" style="font-size:13px;padding:6px 14px">A pagar: $${fmt(liberadaAmt)}</div>`:''}
+    </div>
+  </div>`;
+  html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Vendedor</th><th>Producto</th><th>Venta</th><th>Tasa</th><th>Comisión</th><th>Estado</th><th>Retención hasta</th><th>Acción</th></tr></thead><tbody>`;
+  if(!comms.length){html+=`<tr><td colspan="8" class="empty">No hay comisiones</td></tr>`;}
+  comms.forEach(c=>{
+    const sale=DB.one('sales',s=>s.id===c.saleId);
+    const vn=DB.one('users',u=>u.id===c.vendorId);
+    const pr=sale?DB.one('products',p=>p.id===sale.productId):null;
+    const isVencida=c.status==='RETENIDA'&&c.releaseAt&&c.releaseAt<=n;
+    let accion='—';
+    if(c.status==='RETENIDA') accion=`<button class="btn btn-xs ${isVencida?'btn-primary':'btn-ghost'}" onclick="liberarComision('${c.id}')">${isVencida?'✓ Liberar':'Liberar antes'}</button>`;
+    else if(c.status==='LIBERADA') accion=`<button class="btn btn-xs btn-success" onclick="payCommission('${c.id}')">Marcar pagada</button>`;
+    else if(['PENDING','APPROVED'].includes(c.status)) accion=`<button class="btn btn-xs btn-success" onclick="payCommission('${c.id}')">Marcar pagada</button>`;
+    else if(c.paidAt) accion=`<span class="text-mono" style="color:var(--text-3)">${fmtDate(c.paidAt)}</span>`;
+    html+=`<tr>
+      <td class="td-bold">${esc(vn?.fullName||'—')}</td>
+      <td>${esc(pr?.name?.slice(0,30)||'—')}</td>
+      <td class="td-mono">$${fmt(sale?.salePrice)}</td>
+      <td class="td-mono">${Math.round((c.rate||0)*100)}%</td>
+      <td class="td-mono" style="font-weight:600;color:var(--primary)">$${fmt(c.amount)}</td>
+      <td>${commStatusBadge(c.status)}${isVencida?'<span style="font-size:10px;color:var(--danger);margin-left:4px">vencida</span>':''}</td>
+      <td class="td-mono" style="color:${isVencida?'var(--danger)':'var(--text-3)'}">${c.releaseAt?fmtDate(c.releaseAt):'—'}</td>
+      <td>${accion}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  $('content').innerHTML=html;
+}
+
+function payCommission(id) {
+  const ref = prompt('Referencia de pago (opcional):','');
+  if(ref===null)return;
+  const comm=DB.one('commissions',c=>c.id===id);
+  DB.update('commissions',id,{status:'PAID',paidAt:now(),paymentRef:ref||null});
+  if(comm) addNotification(comm.vendorId,'COMMISSION_PAID','💰 Comisión pagada',`Tu comisión de $${fmt(comm.amount)} fue transferida. Ref: ${ref||'—'}`,'commission',id);
+  toast('Comisión marcada como pagada','success');
+  render();
+}
+
+function liberarComision(id) {
+  DB.update('commissions',id,{status:'LIBERADA'});
+  const comm=DB.one('commissions',c=>c.id===id);
+  if(comm) addNotification(comm.vendorId,'COMMISSION_RELEASED','✓ Comisión liberada','Tu comisión está liberada y lista para pago.','commission',id);
+  toast('Comisión liberada','success');
+  render();
+}
+
+function liberarVencidas() {
+  const n=now();
+  let count=0;
+  DB.all('commissions').forEach(c=>{
+    if(c.status==='RETENIDA'&&c.releaseAt&&c.releaseAt<=n){
+      DB.update('commissions',c.id,{status:'LIBERADA'});
+      addNotification(c.vendorId,'COMMISSION_RELEASED','✓ Comisión liberada automáticamente','Tu período de retención venció. La comisión está disponible para pago.','commission',c.id);
+      count++;
+    }
+  });
+  toast(count>0?`${count} comisión(es) liberada(s)`:'No hay comisiones vencidas para liberar','info');
+  render();
+}
+
+// ── VENDOR: Catalog ────────────────────────────────────────────────────────
+async function viewCatalog() {
+  const products=DB.find('products',p=>p.status==='ACTIVE');
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Catálogo de productos</div><div class="page-sub">Productos disponibles para comercializar</div></div></div>`;
+  if(!products.length){html+=`<div class="empty"><div class="empty-icon">▦</div><div class="empty-text">No hay productos activos</div></div>`;$('content').innerHTML=html;return;}
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">`;
+  products.forEach(p=>{
+    const myLink=DB.one('affiliateLinks',l=>l.vendorId===SESSION.id&&l.productId===p.id&&l.isActive);
+    html+=`<div class="card">
+      <div class="card-hd" style="background:var(--surface-2)">
+        <div><div class="td-bold">${esc(p.name)}</div><span class="badge b-gray" style="margin-top:4px;display:inline-flex">${esc(p.category||'—')}</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--primary)">$${fmt(p.currentPrice)}</div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:12px">${esc(p.description||'')}</p>
+        ${myLink
+          ? `<div><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Tu link de afiliado:</div><div class="link-code">${genUrl(myLink.code)}</div><button class="btn btn-xs btn-ghost" style="margin-top:6px" onclick="copyLink('${myLink.code}')">Copiar link</button></div>`
+          : `<button class="btn btn-primary btn-sm" onclick="createLink('${p.id}')">Generar mi link</button>`
+        }
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+
+function genUrl(code) { return `crm.afiliados.com/r/${code}`; }
+
+function createLink(productId) {
+  const existing=DB.one('affiliateLinks',l=>l.vendorId===SESSION.id&&l.productId===productId&&l.isActive);
+  if(existing){toast('Ya tenés un link para este producto');render();return;}
+  const id=uid(), code=genCode();
+  DB.insert('affiliateLinks',{id,vendorId:SESSION.id,productId,code,isActive:true,createdAt:now()});
+  toast('Link de afiliado creado','success');
+  render();
+}
+
+function copyLink(code) {
+  const url=genUrl(code);
+  navigator.clipboard?.writeText(url).then(()=>toast('Link copiado al portapapeles','success')).catch(()=>toast(`Link: ${url}`,'info'));
+}
+
+// ── VENDOR: Links ──────────────────────────────────────────────────────────
+async function viewLinks() {
+  const links=DB.find('affiliateLinks',l=>l.vendorId===SESSION.id&&l.isActive).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mis links de afiliado</div><div class="page-sub">Usá estos links para atribuir ventas a tu cuenta</div></div><button class="btn btn-primary" onclick="navigate('catalog')">+ Generar nuevo link</button></div>`;
+  html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Precio</th><th>Código</th><th>URL</th><th>Ventas</th><th>Creado</th><th></th></tr></thead><tbody>`;
+  if(!links.length){html+=`<tr><td colspan="7" class="empty">No tenés links. <a href="#" onclick="navigate('catalog')">Generá uno desde el catálogo →</a></td></tr>`;}
+  links.forEach(l=>{
+    const pr=DB.one('products',p=>p.id===l.productId);
+    const saleCount=DB.find('sales',s=>s.affiliateLinkId===l.id).length;
+    html+=`<tr>
+      <td class="td-bold">${esc(pr?.name||'—')}</td>
+      <td class="td-mono">$${fmt(pr?.currentPrice)}</td>
+      <td><span class="badge b-cyan">${esc(l.code)}</span></td>
+      <td><span class="link-code">${genUrl(l.code)}</span></td>
+      <td>${saleCount}</td>
+      <td class="td-mono">${fmtDate(l.createdAt)}</td>
+      <td><button class="btn btn-xs btn-ghost" onclick="copyLink('${l.code}')">Copiar</button></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  $('content').innerHTML=html;
+}
+
+// ── VENDOR: Pipeline ───────────────────────────────────────────────────────
+async function viewPipeline() {
+  const statuses=['PROSPECTO','PROPUESTA_ENVIADA','PAGADO','ENTREGADO'];
+  const myOrders=DB.find('orders',o=>o.vendorId===SESSION.id);
+  const refunded=myOrders.filter(o=>o.status==='REEMBOLSADO');
+
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Pipeline de ventas</div><div class="page-sub">Gestión de prospectos y pedidos</div></div><button class="btn btn-primary" onclick="openNewOrder()">+ Nuevo prospecto</button></div>`;
+  html+=`<div class="pipeline">`;
+  statuses.forEach(st=>{
+    const cols=myOrders.filter(o=>o.status===st);
+    html+=`<div class="pipeline-col">
+      <div class="pipeline-col-hd"><span>${statusLabel(st)}</span><span class="badge b-gray">${cols.length}</span></div>`;
+    cols.forEach(o=>{
+      const cl=DB.one('clients',c=>c.id===o.clientId);
+      const pr=DB.one('products',p=>p.id===o.productId);
+      const next=nextStatus(st);
+      html+=`<div class="pipeline-card">
+        <div class="pipeline-card-title">${esc(cl?.fullName||'—')}</div>
+        <div class="pipeline-card-sub">${esc(pr?.name||'—')}</div>
+        <div class="pipeline-card-price">$${fmt(o.agreedPrice)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">${fmtDate(o.createdAt)}</div>
+        <div class="pipeline-card-actions">
+          ${next?`<button class="btn btn-xs btn-primary" onclick="advanceOrder('${o.id}','${next}')">→ ${statusLabel(next)}</button>`:''}
+          ${st==='PAGADO'||st==='ENTREGADO'?`<button class="btn btn-xs btn-danger" onclick="refundOrder('${o.id}')">Reembolsar</button>`:''}
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  if(refunded.length){
+    html+=`<div class="pipeline-col">
+      <div class="pipeline-col-hd"><span style="color:var(--danger)">Reembolsados</span><span class="badge b-red">${refunded.length}</span></div>`;
+    refunded.forEach(o=>{
+      const cl=DB.one('clients',c=>c.id===o.clientId);
+      const pr=DB.one('products',p=>p.id===o.productId);
+      html+=`<div class="pipeline-card" style="opacity:.6"><div class="pipeline-card-title">${esc(cl?.fullName||'—')}</div><div class="pipeline-card-sub">${esc(pr?.name||'—')}</div><div class="pipeline-card-price" style="color:var(--danger)">$${fmt(o.agreedPrice)}</div></div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+
+function nextStatus(s) {
+  const map={PROSPECTO:'PROPUESTA_ENVIADA',PROPUESTA_ENVIADA:'PAGADO',PAGADO:'ENTREGADO'};
+  return map[s]||null;
+}
+function statusLabel(s) {
+  const map={PROSPECTO:'Prospecto',PROPUESTA_ENVIADA:'Propuesta enviada',PAGADO:'Pagado',ENTREGADO:'Entregado',REEMBOLSADO:'Reembolsado'};
+  return map[s]||s;
+}
+
+function advanceOrder(id, newStatus) {
+  if(newStatus==='PAGADO'){ openPaymentModal(id); return; }
+  const o=DB.one('orders',x=>x.id===id);
+  if(!o)return;
+  const changes={status:newStatus};
+  if(newStatus==='PROPUESTA_ENVIADA'&&!o.proposalSentAt) changes.proposalSentAt=now();
+  if(newStatus==='ENTREGADO'&&!o.deliveredAt) changes.deliveredAt=now();
+  DB.update('orders',id,changes);
+  toast(`Estado actualizado: ${statusLabel(newStatus)}`,'success');
+  render();
+}
+
+function openPaymentModal(orderId) {
+  const o=DB.one('orders',x=>x.id===orderId);
+  const cl=DB.one('clients',c=>c.id===o.clientId);
+  const pr=DB.one('products',p=>p.id===o.productId);
+  openModal('Simular pago del cliente', `
+    <div class="modal-body">
+      <div class="alert-banner alert-banner-info" style="margin-bottom:14px">⚙ Simulación de pasarela de pago — en producción esto llega vía webhook</div>
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:14px;font-size:13px">
+        <div><strong>Cliente:</strong> ${esc(cl?.fullName||'—')}</div>
+        <div><strong>Producto:</strong> ${esc(pr?.name||'—')}</div>
+        <div><strong>Monto:</strong> <span style="font-weight:700;color:var(--primary)">$${fmt(o.agreedPrice)}</span></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Pasarela</label>
+          <select id="pay-gw" class="form-input"><option value="STRIPE">Stripe</option><option value="PAYPAL">PayPal</option><option value="MERCADOPAGO">MercadoPago</option></select></div>
+        <div class="form-group"><label class="form-label">Últimos 4 dígitos</label>
+          <input id="pay-last4" class="form-input" maxlength="4" placeholder="4242" value="4242"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Tipo de medio</label>
+        <select id="pay-method" class="form-input"><option value="card">Tarjeta de crédito</option><option value="debit">Tarjeta de débito</option><option value="bank_transfer">Transferencia bancaria</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-success" onclick="confirmPayment('${orderId}')">✓ Confirmar pago</button>
+    </div>
+  `);
+}
+
+function confirmPayment(orderId) {
+  const o=DB.one('orders',x=>x.id===orderId);
+  if(!o){closeModal();return;}
+  const gw=$('pay-gw').value, last4=$('pay-last4').value, method=$('pay-method').value;
+
+  // Fraud: self-purchase check
+  const client=DB.one('clients',c=>c.id===o.clientId);
+  const vendor=DB.one('users',u=>u.id===o.vendorId);
+  if(client&&vendor&&client.email===vendor.email){
+    DB.insert('fraudAlerts',{id:uid(),type:'SELF_PURCHASE',vendorId:o.vendorId,orderId,description:`Vendedor ${vendor.email} intentó comprar su propio link (cliente: ${client.email})`,status:'OPEN',resolvedBy:null,createdAt:now(),resolvedAt:null});
+    addNotification(getAdminId(),'FRAUD_ALERT_NEW','⚑ Alerta anti-fraude: auto-compra detectada',`Vendedor ${vendor.fullName} intentó comprar su propio link. Pedido bloqueado.`,'fraudAlert',null);
+    closeModal();toast('⚑ Pago bloqueado: auto-compra detectada','error');return;
+  }
+
+  // Fraud: volume spike (> 3 sales in last 24h for this vendor)
+  const recentSales=DB.find('sales',s=>s.vendorId===o.vendorId&&s.status==='CONFIRMED'&&s.attributedAt>now().slice(0,10));
+  if(recentSales.length>=3){
+    DB.insert('fraudAlerts',{id:uid(),type:'VOLUME_SPIKE',vendorId:o.vendorId,orderId,description:`Vendedor ${vendor?.fullName} tiene ${recentSales.length+1} ventas hoy (pico anómalo)`,status:'OPEN',resolvedBy:null,createdAt:now(),resolvedAt:null});
+    addNotification(getAdminId(),'FRAUD_ALERT_NEW','⚑ Alerta anti-fraude: pico de volumen',`Vendedor ${vendor?.fullName} superó el umbral de ventas diarias.`,'fraudAlert',null);
+  }
+
+  // Create payment transaction
+  const txnId=uid();
+  DB.insert('paymentTransactions',{id:txnId,orderId,gateway:gw,gatewayTxnId:'GW-'+uid().slice(0,8).toUpperCase(),amount:o.agreedPrice,currency:'USD',status:'SUCCEEDED',paymentMethod:method,paymentMethodLast4:last4,clientId:o.clientId,invoiceUrl:'https://receipts.example.com/'+txnId,rawWebhook:{event:'payment.succeeded',amount:o.agreedPrice},processedAt:now()});
+
+  // Check double attribution
+  const existingSale=DB.one('sales',s=>s.clientId===o.clientId&&s.productId===o.productId&&s.status==='CONFIRMED');
+  if(existingSale){closeModal();toast('Atribución duplicada: cliente ya tiene esta venta atribuida','error');return;}
+
+  // Create sale
+  const saleId=uid();
+  const link=DB.one('affiliateLinks',l=>l.vendorId===o.vendorId&&l.productId===o.productId&&l.isActive);
+  DB.insert('sales',{id:saleId,affiliateLinkId:link?.id||null,vendorId:o.vendorId,productId:o.productId,clientId:o.clientId,salePrice:o.agreedPrice,status:'CONFIRMED',attributedAt:now()});
+
+  // Commission using rules
+  const rule=getBestCommRule(o.vendorId,o.productId);
+  const rate=rule?.value||0.15;
+  const holdDays=rule?.holdDays||15;
+  const guaranteeDays=rule?.guaranteeDays||30;
+  const commAmt=Math.round(o.agreedPrice*rate*100)/100;
+  const releaseAt=addDays(now(),holdDays);
+  const commId=uid();
+  DB.insert('commissions',{id:commId,saleId,vendorId:o.vendorId,rate,amount:commAmt,status:'RETENIDA',paidAt:null,paymentRef:null,releaseAt,guaranteeDays,holdDays});
+
+  DB.update('orders',orderId,{status:'PAGADO',paidAt:now(),saleId});
+
+  // Notifications
+  addNotification(o.vendorId,'SALE_CONFIRMED','✓ Venta confirmada',`Pago recibido por ${pr?.name||'producto'}. Comisión generada: $${fmt(commAmt)} (retenida por ${holdDays} días).`,'order',orderId);
+
+  closeModal();
+  toast(`Pago confirmado. Comisión $${fmt(commAmt)} generada (retenida ${holdDays} días)`,'success');
+  render();
+
+  function pr(){ return DB.one('products',p=>p.id===o.productId); }
+}
+
+function addDays(dateStr, days) {
+  const d=new Date(dateStr.replace(' ','T'));
+  d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,19).replace('T',' ');
+}
+
+function getAdminId() {
+  return DB.one('users',u=>u.role==='ADMIN')?.id;
+}
+
+function getBestCommRule(vendorId, productId) {
+  const rules=DB.all('commissionRules').filter(r=>r.isActive);
+  return rules.find(r=>r.scope==='VENDOR_PRODUCT'&&r.vendorId===vendorId&&r.productId===productId)
+      || rules.find(r=>r.scope==='VENDOR'&&r.vendorId===vendorId)
+      || rules.find(r=>r.scope==='PRODUCT'&&r.productId===productId)
+      || rules.find(r=>r.scope==='GLOBAL')
+      || null;
+}
+
+function addNotification(recipientId, type, subject, body, refEntity, refId) {
+  if(!recipientId)return;
+  DB.insert('notifications',{id:uid(),recipientId,type,channel:'IN_APP',subject,body,refEntity:refEntity||null,refId:refId||null,readAt:null,sentAt:now()});
+  if(recipientId===SESSION?.id) updateNotifBell();
+}
+
+function refundOrder(id){
+  if(!confirm('¿Marcar este pedido como reembolsado? Se revertirá la comisión.'))return;
+  const o=DB.one('orders',x=>x.id===id);
+  if(o.saleId){
+    DB.update('sales',o.saleId,{status:'REFUNDED'});
+    const comm=DB.one('commissions',c=>c.saleId===o.saleId);
+    if(comm){
+      DB.update('commissions',comm.id,{status:'REVERSED'});
+      addNotification(o.vendorId,'COMMISSION_REVERSED','↩ Comisión revertida por reembolso',`La comisión de $${fmt(comm.amount)} fue revertida por reembolso del pedido.`,'commission',comm.id);
+    }
+  }
+  DB.update('orders',id,{status:'REEMBOLSADO'});
+  toast('Pedido reembolsado');
+  render();
+}
+
+function openNewOrder() {
+  const myClients=DB.find('clients',c=>c.originVendorId===SESSION.id);
+  const products=DB.find('products',p=>p.status==='ACTIVE');
+  if(!myClients.length){
+    openModal('Nuevo prospecto',`
+      <div class="modal-body">
+        <p style="color:var(--text-2);margin-bottom:14px">Primero agregá un cliente/prospecto:</p>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nombre completo</label><input id="nc-name" class="form-input" placeholder="Empresa SA" required></div>
+          <div class="form-group"><label class="form-label">Teléfono</label><input id="nc-phone" class="form-input" placeholder="+54 11 0000-0000"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label><input id="nc-email" type="email" class="form-input" required placeholder="email@empresa.com"></div>
+        <div class="form-group"><label class="form-label">Producto de interés</label><select id="nc-prod" class="form-input">${products.map(p=>`<option value="${p.id}">${esc(p.name)} — $${fmt(p.currentPrice)}</option>`).join('')}</select></div>
+        <div class="form-group"><label class="form-label">Precio acordado (USD)</label><input id="nc-price" type="number" class="form-input" placeholder="0.00"></div>
+        <div class="form-group"><label class="form-label">Notas</label><textarea id="nc-notes" class="form-input" rows="2" placeholder="Info del prospecto..."></textarea></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveNewClientOrder()">Crear prospecto</button></div>
+    `);
+  } else {
+    openModal('Nuevo pedido/prospecto',`
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">Cliente</label>
+          <select id="no-client" class="form-input">
+            ${myClients.map(c=>`<option value="${c.id}">${esc(c.fullName)} — ${esc(c.email)}</option>`).join('')}
+          </select>
+          <div class="form-hint"><a href="#" onclick="openNewClientForm()">+ Agregar nuevo cliente</a></div>
+        </div>
+        <div class="form-group"><label class="form-label">Producto</label>
+          <select id="no-prod" class="form-input" onchange="updateOrderPrice(this)">${products.map(p=>`<option value="${p.id}" data-price="${p.currentPrice}">${esc(p.name)} — $${fmt(p.currentPrice)}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="form-label">Precio acordado (USD)</label><input id="no-price" type="number" class="form-input" value="${products[0]?.currentPrice||''}"></div>
+        <div class="form-group"><label class="form-label">Notas</label><textarea id="no-notes" class="form-input" rows="2" placeholder="Notas del pedido..."></textarea></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveNewOrder()">Crear</button></div>
+    `);
+  }
+}
+
+function updateOrderPrice(sel) {
+  const opt=sel.options[sel.selectedIndex];
+  const price=opt.dataset.price;
+  $('no-price').value=price;
+}
+
+function openNewClientForm() {
+  const products=DB.find('products',p=>p.status==='ACTIVE');
+  openModal('Nuevo cliente y pedido',`
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nombre completo</label><input id="nc-name" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input id="nc-phone" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input id="nc-email" type="email" class="form-input" required></div>
+      <div class="form-group"><label class="form-label">Producto</label><select id="nc-prod" class="form-input">${products.map(p=>`<option value="${p.id}">${esc(p.name)} — $${fmt(p.currentPrice)}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Precio acordado (USD)</label><input id="nc-price" type="number" class="form-input" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea id="nc-notes" class="form-input" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveNewClientOrder()">Crear</button></div>
+  `);
+}
+
+function saveNewClientOrder() {
+  const name=($('nc-name')||{}).value?.trim(), phone=($('nc-phone')||{}).value?.trim(),
+    email=($('nc-email')||{}).value?.toLowerCase().trim(), productId=($('nc-prod')||{}).value,
+    priceVal=($('nc-price')||{}).value, notes=($('nc-notes')||{}).value?.trim();
+  if(!name||!email){toast('Nombre y email requeridos','error');return;}
+  if(DB.one('clients',c=>c.email===email&&c.originVendorId===SESSION.id)){toast('Cliente ya registrado','error');return;}
+  const prod=DB.one('products',p=>p.id===productId);
+  const price=parseFloat(priceVal)||prod?.currentPrice||0;
+  const cid=uid();
+  DB.insert('clients',{id:cid,fullName:name,email,phone:phone||null,originVendorId:SESSION.id,notes:notes||null,createdAt:now()});
+  if(productId){
+    DB.insert('orders',{id:uid(),clientId:cid,productId,vendorId:SESSION.id,status:'PROSPECTO',agreedPrice:price,saleId:null,vendorNotes:'',proposalSentAt:null,paidAt:null,deliveredAt:null,createdAt:now()});
+  }
+  closeModal(); toast('Prospecto creado','success'); render();
+}
+
+function saveNewOrder() {
+  const clientId=$('no-client').value, productId=$('no-prod').value;
+  const price=parseFloat($('no-price').value)||0, notes=$('no-notes').value.trim();
+  if(!clientId||!productId){toast('Datos requeridos','error');return;}
+  DB.insert('orders',{id:uid(),clientId,productId,vendorId:SESSION.id,status:'PROSPECTO',agreedPrice:price,saleId:null,vendorNotes:notes,proposalSentAt:null,paidAt:null,deliveredAt:null,createdAt:now()});
+  closeModal(); toast('Prospecto creado','success'); render();
+}
+
+// ── VENDOR: My Commissions ─────────────────────────────────────────────────
+async function viewMyCommissions() {
+  const comms=DB.find('commissions',c=>c.vendorId===SESSION.id).sort((a,b)=>{
+    const sa=DB.one('sales',s=>s.id===a.saleId),sb=DB.one('sales',s=>s.id===b.saleId);
+    return (sb?.attributedAt||'').localeCompare(sa?.attributedAt||'');
+  });
+  const retenida=comms.filter(c=>c.status==='RETENIDA').reduce((s,x)=>s+x.amount,0);
+  const liberada=comms.filter(c=>c.status==='LIBERADA').reduce((s,x)=>s+x.amount,0);
+  const paid=comms.filter(c=>c.status==='PAID').reduce((s,x)=>s+x.amount,0);
+
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mis comisiones</div><div class="page-sub">Detalle de comisiones generadas por tus ventas</div></div></div>`;
+  html+=`<div class="stats" style="margin-bottom:20px">
+    <div class="stat" style="border-color:var(--warning)"><div class="stat-label">En retención</div><div class="stat-val" style="color:var(--warning)">$${fmt(retenida)}</div><div class="stat-sub">liberación pendiente</div></div>
+    <div class="stat" style="border-color:#6D28D9"><div class="stat-label">Liberada (a cobrar)</div><div class="stat-val" style="color:#6D28D9">$${fmt(liberada)}</div></div>
+    <div class="stat success-card"><div class="stat-label">Total cobrado</div><div class="stat-val">$${fmt(paid)}</div></div>
+    <div class="stat"><div class="stat-label">Total ventas</div><div class="stat-val">${comms.filter(c=>c.status!=='REVERSED').length}</div></div>
+  </div>`;
+  html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Cliente</th><th>Venta</th><th>Tasa</th><th>Comisión</th><th>Estado</th><th>Libera / Pagado</th></tr></thead><tbody>`;
+  if(!comms.length){html+=`<tr><td colspan="7" class="empty">Todavía no generaste comisiones. Confirmá un pago en el pipeline.</td></tr>`;}
+  comms.forEach(c=>{
+    const sale=DB.one('sales',s=>s.id===c.saleId);
+    const pr=sale?DB.one('products',p=>p.id===sale.productId):null;
+    const cl=sale?DB.one('clients',x=>x.id===sale.clientId):null;
+    const dateCol=c.paidAt?fmtDate(c.paidAt):c.releaseAt?fmtDate(c.releaseAt):'—';
+    html+=`<tr>
+      <td>${esc(pr?.name||'—')}</td>
+      <td>${esc(cl?.fullName||'—')}</td>
+      <td class="td-mono">$${fmt(sale?.salePrice)}</td>
+      <td class="td-mono">${Math.round((c.rate||0)*100)}%</td>
+      <td class="td-mono" style="font-weight:700;color:var(--primary)">$${fmt(c.amount)}</td>
+      <td>${commStatusBadge(c.status)}</td>
+      <td class="td-mono">${dateCol}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  $('content').innerHTML=html;
+}
+
+// ── Badge helpers ──────────────────────────────────────────────────────────
+function statusBadge(s){
+  const map={PROSPECTO:'b-gray',PROPUESTA_ENVIADA:'b-blue',PAGADO:'b-yellow',ENTREGADO:'b-green',REEMBOLSADO:'b-red'};
+  return `<span class="badge ${map[s]||'b-gray'}">${statusLabel(s)}</span>`;
+}
+function vendorStatusBadge(s){
+  const map={ACTIVE:'b-green',PENDING:'b-yellow',INACTIVE:'b-gray',SUSPENDED:'b-red'};
+  const labels={ACTIVE:'Activo',PENDING:'Pendiente',INACTIVE:'Inactivo',SUSPENDED:'Suspendido'};
+  return `<span class="badge ${map[s]||'b-gray'}">${labels[s]||s}</span>`;
+}
+function productStatusBadge(s){
+  const map={ACTIVE:'b-green',INACTIVE:'b-gray',ARCHIVED:'b-red'};
+  const labels={ACTIVE:'Activo',INACTIVE:'Inactivo',ARCHIVED:'Archivado'};
+  return `<span class="badge ${map[s]||'b-gray'}">${labels[s]||s}</span>`;
+}
+function commStatusBadge(s){
+  const map={PENDING:'b-yellow',RETENIDA:'b-orange',LIBERADA:'b-purple',APPROVED:'b-blue',PAID:'b-green',REVERSED:'b-red'};
+  const labels={PENDING:'Pendiente',RETENIDA:'Retenida',LIBERADA:'Liberada',APPROVED:'Aprobada',PAID:'Pagada',REVERSED:'Revertida'};
+  return `<span class="badge ${map[s]||'b-gray'}">${labels[s]||s}</span>`;
+}
+
+// ── ADMIN: Commission Rules ────────────────────────────────────────────────
+async function viewCommRules() {
+  const rules=DB.all('commissionRules').sort((a,b)=>a.scope.localeCompare(b.scope));
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Reglas de comisión</div><div class="page-sub">Configuración del motor de cálculo de comisiones</div></div><button class="btn btn-primary" onclick="openAddRule()">+ Nueva regla</button></div>`;
+  html+=`<div class="alert-banner alert-banner-info" style="margin-bottom:16px">Prioridad de aplicación: VENDOR_PRODUCT &gt; VENDOR &gt; PRODUCT &gt; GLOBAL</div>`;
+  html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Ámbito</th><th>Vendedor</th><th>Producto</th><th>Tipo</th><th>Valor</th><th>Retención</th><th>Garantía</th><th>Estado</th><th>Acción</th></tr></thead><tbody>`;
+  if(!rules.length){html+=`<tr><td colspan="9"><div class="empty">No hay reglas. Se usará tasa global del 15% por defecto.</div></td></tr>`;}
+  rules.forEach(r=>{
+    const vn=r.vendorId?DB.one('users',u=>u.id===r.vendorId):null;
+    const pr=r.productId?DB.one('products',p=>p.id===r.productId):null;
+    const val=r.type==='PERCENT'?`${Math.round(r.value*100)}%`:r.type==='FIXED'?`$${fmt(r.value)}`:JSON.stringify(r.tiersConfig||[]).slice(0,30);
+    html+=`<tr>
+      <td><span class="badge ${r.scope==='GLOBAL'?'b-blue':r.scope==='VENDOR_PRODUCT'?'b-green':'b-gray'}">${r.scope}</span></td>
+      <td>${esc(vn?.fullName||'—')}</td>
+      <td>${esc(pr?.name?.slice(0,25)||'—')}</td>
+      <td class="td-mono">${r.type}</td>
+      <td class="td-mono" style="font-weight:700;color:var(--primary)">${val}</td>
+      <td class="td-mono">${r.holdDays||15}d</td>
+      <td class="td-mono">${r.guaranteeDays||30}d</td>
+      <td>${r.isActive?'<span class="badge b-green">Activa</span>':'<span class="badge b-gray">Inactiva</span>'}</td>
+      <td><div class="flex gap-2">
+        <button class="btn btn-xs btn-ghost" onclick="toggleRule('${r.id}',${!r.isActive})">${r.isActive?'Desactivar':'Activar'}</button>
+        <button class="btn btn-xs btn-danger" onclick="deleteRule('${r.id}')">✕</button>
+      </div></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  $('content').innerHTML=html;
+}
+
+function openAddRule() {
+  const vendors=DB.find('users',u=>u.role==='VENDOR'&&u.status==='ACTIVE');
+  const products=DB.find('products',p=>p.status==='ACTIVE');
+  openModal('Nueva regla de comisión',`
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Ámbito</label>
+          <select id="r-scope" class="form-input" onchange="updateRuleForm()">
+            <option value="GLOBAL">GLOBAL</option><option value="PRODUCT">PRODUCT</option>
+            <option value="VENDOR">VENDOR</option><option value="VENDOR_PRODUCT">VENDOR_PRODUCT</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select id="r-type" class="form-input"><option value="PERCENT">Porcentaje (%)</option><option value="FIXED">Monto fijo ($)</option></select></div>
+      </div>
+      <div id="r-vendor-row" class="form-group hidden"><label class="form-label">Vendedor</label>
+        <select id="r-vendor" class="form-input"><option value="">— seleccioná —</option>${vendors.map(v=>`<option value="${v.id}">${esc(v.fullName)}</option>`).join('')}</select></div>
+      <div id="r-product-row" class="form-group hidden"><label class="form-label">Producto</label>
+        <select id="r-product" class="form-input"><option value="">— seleccioná —</option>${products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Valor</label>
+        <input id="r-value" type="number" step="0.01" class="form-input" placeholder="Ej: 0.15 para 15% o 500 para $500 fijo"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Días de retención</label><input id="r-hold" type="number" class="form-input" value="15"></div>
+        <div class="form-group"><label class="form-label">Días de garantía (reembolso)</label><input id="r-guar" type="number" class="form-input" value="30"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveRule()">Guardar regla</button></div>
+  `);
+  updateRuleForm();
+}
+
+function updateRuleForm() {
+  const scope=document.getElementById('r-scope')?.value;
+  const vr=document.getElementById('r-vendor-row');
+  const pr=document.getElementById('r-product-row');
+  if(vr) vr.classList.toggle('hidden',!['VENDOR','VENDOR_PRODUCT'].includes(scope));
+  if(pr) pr.classList.toggle('hidden',!['PRODUCT','VENDOR_PRODUCT'].includes(scope));
+}
+
+function saveRule() {
+  const scope=$('r-scope').value, type=$('r-type').value, value=parseFloat($('r-value').value);
+  const vendorId=$('r-vendor')?.value||null, productId=$('r-product')?.value||null;
+  const holdDays=parseInt($('r-hold').value)||15, guaranteeDays=parseInt($('r-guar').value)||30;
+  if(isNaN(value)||value<=0){toast('Valor requerido','error');return;}
+  DB.insert('commissionRules',{id:uid(),scope,vendorId:vendorId||null,productId:productId||null,type,value,tiersConfig:null,holdDays,guaranteeDays,isActive:true,createdAt:now()});
+  closeModal();toast('Regla creada','success');render();
+}
+
+function toggleRule(id, active) {
+  DB.update('commissionRules',id,{isActive:active});
+  toast(active?'Regla activada':'Regla desactivada');
+  render();
+}
+
+function deleteRule(id) {
+  if(!confirm('¿Eliminar esta regla?'))return;
+  DB.remove('commissionRules',id);
+  toast('Regla eliminada');render();
+}
+
+// ── ADMIN: Reporting ───────────────────────────────────────────────────────
+async function viewReporting() {
+  const sales=DB.find('sales',s=>s.status==='CONFIRMED');
+  const comms=DB.all('commissions');
+  const orders=DB.all('orders');
+  const vendors=DB.find('users',u=>u.role==='VENDOR'&&u.status==='ACTIVE');
+  const products=DB.all('products');
+
+  // Top vendors by revenue
+  const vendorRevMap={};
+  sales.forEach(s=>{ vendorRevMap[s.vendorId]=(vendorRevMap[s.vendorId]||0)+s.salePrice; });
+  const topVendors=Object.entries(vendorRevMap).map(([id,rev])=>({id,rev})).sort((a,b)=>b.rev-a.rev).slice(0,5);
+
+  // Top products
+  const prodSalesMap={};
+  sales.forEach(s=>{ prodSalesMap[s.productId]=(prodSalesMap[s.productId]||{count:0,rev:0}); prodSalesMap[s.productId].count++; prodSalesMap[s.productId].rev+=s.salePrice; });
+  const topProducts=Object.entries(prodSalesMap).map(([id,d])=>({id,...d})).sort((a,b)=>b.rev-a.rev).slice(0,5);
+
+  // Commission projections (RETENIDA → vencen en 30 días)
+  const soon=addDays(now(),30);
+  const projComms=comms.filter(c=>c.status==='RETENIDA'&&c.releaseAt&&c.releaseAt<=soon);
+  const projAmt=projComms.reduce((s,x)=>s+x.amount,0);
+
+  // Inactive vendors (no orders in 30 days)
+  const cutoff=addDays(now(),-30);
+  const inactiveVendors=vendors.filter(v=>{
+    const lastOrder=DB.find('orders',o=>o.vendorId===v.id).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))[0];
+    return !lastOrder||lastOrder.createdAt<cutoff;
+  });
+
+  const totalRev=sales.reduce((s,x)=>s+x.salePrice,0);
+  const liberadaAmt=comms.filter(c=>c.status==='LIBERADA').reduce((s,x)=>s+x.amount,0);
+  const convRate=orders.length>0?Math.round(sales.length/orders.length*100):0;
+
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Reportes</div><div class="page-sub">Dashboard consolidado del negocio</div></div></div>`;
+
+  html+=`<div class="stats">
+    <div class="stat accent"><div class="stat-label">Ingresos totales</div><div class="stat-val">$${fmt(totalRev)}</div><div class="stat-sub">${sales.length} ventas confirmadas</div></div>
+    <div class="stat"><div class="stat-label">Comisiones a pagar</div><div class="stat-val">$${fmt(liberadaAmt)}</div><div class="stat-sub">estado LIBERADA</div></div>
+    <div class="stat success-card"><div class="stat-label">Tasa de conversión</div><div class="stat-val">${convRate}%</div><div class="stat-sub">prospectos → ventas</div></div>
+    <div class="stat"><div class="stat-label">Proyección 30 días</div><div class="stat-val">$${fmt(projAmt)}</div><div class="stat-sub">${projComms.length} comisiones a liberar</div></div>
+  </div>`;
+
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">🏆 Top vendedores</span></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Vendedor</th><th>Ingresos</th></tr></thead><tbody>`;
+  if(!topVendors.length){html+=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;}
+  topVendors.forEach((v,i)=>{
+    const u=DB.one('users',u=>u.id===v.id);
+    html+=`<tr><td class="td-mono">${i+1}</td><td class="td-bold">${esc(u?.fullName||'—')}</td><td class="td-mono" style="color:var(--primary)">$${fmt(v.rev)}</td></tr>`;
+  });
+  html+=`</tbody></table></div></div>
+
+    <div class="card">
+      <div class="card-hd"><span class="card-title">📦 Top productos</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Producto</th><th>Ventas</th><th>Ingresos</th></tr></thead><tbody>`;
+  if(!topProducts.length){html+=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;}
+  topProducts.forEach(p=>{
+    const pr=DB.one('products',x=>x.id===p.id);
+    html+=`<tr><td>${esc(pr?.name?.slice(0,30)||'—')}</td><td class="td-mono">${p.count}</td><td class="td-mono" style="color:var(--primary)">$${fmt(p.rev)}</td></tr>`;
+  });
+  html+=`</tbody></table></div></div>
+  </div>`;
+
+  if(inactiveVendors.length){
+    html+=`<div class="alert-banner alert-banner-warn" style="margin-bottom:12px">⚠ ${inactiveVendors.length} vendedor(es) sin actividad en los últimos 30 días: ${inactiveVendors.map(v=>esc(v.fullName)).join(', ')}</div>`;
+  }
+
+  if(projComms.length){
+    html+=`<div class="card"><div class="card-hd"><span class="card-title">📅 Comisiones a liberar en 30 días</span></div><div class="table-wrap"><table><thead><tr><th>Vendedor</th><th>Monto</th><th>Fecha liberación</th><th>Estado</th></tr></thead><tbody>`;
+    projComms.sort((a,b)=>a.releaseAt.localeCompare(b.releaseAt)).forEach(c=>{
+      const vn=DB.one('users',u=>u.id===c.vendorId);
+      html+=`<tr><td class="td-bold">${esc(vn?.fullName||'—')}</td><td class="td-mono" style="color:var(--primary)">$${fmt(c.amount)}</td><td class="td-mono">${fmtDate(c.releaseAt)}</td><td>${commStatusBadge(c.status)}</td></tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+
+  $('content').innerHTML=html;
+}
+
+// ── ADMIN: Fraud Alerts ────────────────────────────────────────────────────
+async function viewFraudAlerts() {
+  const alerts=DB.all('fraudAlerts').sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  const openCount=alerts.filter(a=>a.status==='OPEN').length;
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Anti-fraude</div><div class="page-sub">Alertas de patrones sospechosos</div></div>${openCount>0?`<span class="badge b-red" style="font-size:13px;padding:6px 14px">${openCount} alerta(s) abiertas</span>`:''}</div>`;
+
+  const typeLabels={SELF_PURCHASE:'Auto-compra',IP_CLUSTER:'Cluster IP',CARD_CLUSTER:'Cluster tarjeta',VOLUME_SPIKE:'Pico de volumen'};
+  const statusLabels={OPEN:'Abierta',REVIEWING:'En revisión',DISMISSED:'Descartada',CONFIRMED_FRAUD:'Fraude confirmado'};
+  const statusBadges={OPEN:'b-red',REVIEWING:'b-yellow',DISMISSED:'b-gray',CONFIRMED_FRAUD:'b-red'};
+
+  html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>`;
+  if(!alerts.length){html+=`<tr><td colspan="6"><div class="empty"><div class="empty-icon">✓</div><div class="empty-text">No hay alertas de fraude registradas</div></div></td></tr>`;}
+  alerts.forEach(a=>{
+    const vn=DB.one('users',u=>u.id===a.vendorId);
+    html+=`<tr>
+      <td><span class="badge b-rose">${typeLabels[a.type]||a.type}</span></td>
+      <td class="td-bold">${esc(vn?.fullName||'—')}</td>
+      <td style="max-width:280px;color:var(--text-2);font-size:12px">${esc(a.description)}</td>
+      <td><span class="badge ${statusBadges[a.status]||'b-gray'}">${statusLabels[a.status]||a.status}</span></td>
+      <td class="td-mono">${fmtDate(a.createdAt)}</td>
+      <td><div class="flex gap-2">
+        ${a.status==='OPEN'||a.status==='REVIEWING'?`
+          <button class="btn btn-xs btn-ghost" onclick="resolveAlert('${a.id}','DISMISSED')">Descartar</button>
+          <button class="btn btn-xs btn-danger" onclick="resolveAlert('${a.id}','CONFIRMED_FRAUD')">Confirmar fraude</button>`:''
+        }
+      </div></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  $('content').innerHTML=html;
+}
+
+function resolveAlert(id, status) {
+  DB.update('fraudAlerts',id,{status,resolvedBy:SESSION.id,resolvedAt:now()});
+  if(status==='CONFIRMED_FRAUD'){
+    const alert=DB.one('fraudAlerts',a=>a.id===id);
+    if(alert) DB.update('users',alert.vendorId,{status:'SUSPENDED'});
+    toast('Fraude confirmado. Vendedor suspendido.','error');
+  } else {
+    toast('Alerta descartada');
+  }
+  render();
+}
+
+// ── VENDOR: Fiscal Profile & Contract ─────────────────────────────────────
+async function viewFiscalProfile() {
+  const fiscal=DB.one('fiscalProfiles',f=>f.vendorId===SESSION.id)||{};
+  const contracts=DB.find('vendorContracts',c=>c.vendorId===SESSION.id).sort((a,b)=>b.signedAt?.localeCompare(a.signedAt||'')||0);
+  const activeContract=contracts.find(c=>c.isCurrent);
+
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mi perfil fiscal y contrato</div><div class="page-sub">Datos necesarios para el pago de comisiones</div></div></div>`;
+
+  if(!activeContract){
+    html+=`<div class="alert-banner alert-banner-danger">⚠ No tenés un contrato activo. El pago de comisiones está bloqueado hasta que aceptes los términos.</div>`;
+  }
+
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="card-hd"><span class="card-title">Datos fiscales</span>${fiscal.verified?'<span class="badge b-green">Verificado</span>':'<span class="badge b-yellow">Sin verificar</span>'}</div>
+    <div class="card-body">
+      <div class="form-group"><label class="form-label">RUC</label><input id="fp-taxid" class="form-input" value="${esc(fiscal.taxId||'')}" placeholder="20-12345678-9"></div>
+      <div class="form-group"><label class="form-label">Razón social / Nombre fiscal</label><input id="fp-legal" class="form-input" value="${esc(fiscal.legalName||'')}" placeholder="Mi Empresa SRL"></div>
+      <div class="form-group"><label class="form-label">Condición fiscal</label>
+        <select id="fp-condition" class="form-input">
+          <option${fiscal.taxCondition==='Monotributista'?' selected':''}>Monotributista</option>
+          <option${fiscal.taxCondition==='Responsable Inscripto'?' selected':''}>Responsable Inscripto</option>
+          <option${fiscal.taxCondition==='Exento'?' selected':''}>Exento</option>
+          <option${fiscal.taxCondition==='Consumidor Final'?' selected':''}>Consumidor Final</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Método de cobro</label>
+        <select id="fp-payout" class="form-input">
+          <option value="BANK_TRANSFER"${fiscal.payoutMethod==='BANK_TRANSFER'?' selected':''}>Transferencia bancaria</option>
+          <option value="PAYPAL"${fiscal.payoutMethod==='PAYPAL'?' selected':''}>PayPal</option>
+          <option value="CRYPTO"${fiscal.payoutMethod==='CRYPTO'?' selected':''}>Cripto</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Detalle de cobro (CBU/alias/email)</label><input id="fp-detail" class="form-input" value="${esc(fiscal.payoutDetail||'')}" placeholder="CBU, alias o email de PayPal"></div>
+      <button class="btn btn-primary" onclick="saveFiscalProfile()">Guardar datos fiscales</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><span class="card-title">Contrato de afiliado</span></div>
+    <div class="card-body">
+      ${activeContract
+        ? `<div class="alert-banner alert-banner-info" style="margin-bottom:12px">✓ Contrato vigente firmado el ${fmtDate(activeContract.signedAt)}</div>`
+        : `<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Para recibir comisiones necesitás aceptar el acuerdo de afiliado.</p>`
+      }
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12px;color:var(--text-2);max-height:160px;overflow-y:auto;margin-bottom:14px;line-height:1.6">
+        <strong>Acuerdo de Afiliado v2026-v1</strong><br><br>
+        El vendedor acepta recibir comisiones según las reglas configuradas, que pueden modificarse con 15 días de aviso. La tasa base es del 15% sobre el precio de venta. Las comisiones se retienen por el período configurado y se revierten automáticamente ante reembolso dentro del período de garantía. El vendedor se compromete a no realizar auto-compras ni prácticas fraudulentas. El incumplimiento resulta en suspensión inmediata y pérdida de comisiones pendientes.
+      </div>
+      ${!activeContract?`
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
+            <input type="checkbox" id="contract-accept">
+            <span>Acepto los términos del acuerdo de afiliado</span>
+          </label>
+        </div>
+        <button class="btn btn-success" onclick="signContract()">Firmar acuerdo digitalmente</button>`
+        : `<button class="btn btn-ghost btn-sm" onclick="viewContractHistory()">Ver historial de contratos</button>`
+      }
+    </div>
+  </div>
+  </div>`;
+
+  $('content').innerHTML=html;
+}
+
+function saveFiscalProfile() {
+  const taxId=$('fp-taxid').value.trim(), legalName=$('fp-legal').value.trim();
+  const taxCondition=$('fp-condition').value, payoutMethod=$('fp-payout').value;
+  const payoutDetail=$('fp-detail').value.trim();
+  if(!taxId||!legalName){toast('CUIT y Razón social son requeridos','error');return;}
+
+  const existing=DB.one('fiscalProfiles',f=>f.vendorId===SESSION.id);
+  if(existing){
+    DB.update('fiscalProfiles',existing.id,{taxId,legalName,taxCondition,payoutMethod,payoutDetail,updatedAt:now()});
+  } else {
+    DB.insert('fiscalProfiles',{id:uid(),vendorId:SESSION.id,taxId,legalName,taxCondition,country:'AR',payoutMethod,payoutDetail,verified:false,updatedAt:now()});
+  }
+  toast('Datos fiscales guardados','success');render();
+}
+
+function signContract() {
+  if(!$('contract-accept')?.checked){toast('Debés aceptar los términos primero','error');return;}
+  DB.find('vendorContracts',c=>c.vendorId===SESSION.id).forEach(c=>DB.update('vendorContracts',c.id,{isCurrent:false}));
+  DB.insert('vendorContracts',{id:uid(),vendorId:SESSION.id,version:'2026-v1',signedAt:now(),signatureMethod:'DIGITAL',documentUrl:'https://docs.crm-afiliados.com/contrato-2026-v1.pdf',ipAddress:'127.0.0.1',isCurrent:true});
+  toast('Contrato firmado digitalmente','success');render();
+}
+
+function viewContractHistory() {
+  const contracts=DB.find('vendorContracts',c=>c.vendorId===SESSION.id).sort((a,b)=>b.signedAt.localeCompare(a.signedAt));
+  const rows=contracts.map(c=>`<tr><td class="td-mono">${fmtDate(c.signedAt)}</td><td class="td-mono">${c.version}</td><td>${c.signatureMethod}</td><td>${c.isCurrent?'<span class="badge b-green">Vigente</span>':'<span class="badge b-gray">Anterior</span>'}</td></tr>`).join('');
+  openModal('Historial de contratos',`<div class="modal-body"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Versión</th><th>Método</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table></div></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cerrar</button></div>`);
+}
+
+// ── Notifications ──────────────────────────────────────────────────────────
+function updateNotifBell() {
+  if(!SESSION)return;
+  const unread=DB.find('notifications',n=>n.recipientId===SESSION.id&&!n.readAt).length;
+  const badge=$('notif-count');
+  if(badge){
+    badge.textContent=unread>9?'9+':unread;
+    badge.style.display=unread>0?'flex':'none';
+  }
+}
+
+async function viewNotifications() {
+  const notifs=DB.find('notifications',n=>n.recipientId===SESSION.id).sort((a,b)=>b.sentAt.localeCompare(a.sentAt));
+  const unread=notifs.filter(n=>!n.readAt).length;
+
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Notificaciones</div><div class="page-sub">${unread>0?`${unread} sin leer`:''}</div></div>
+    ${unread>0?`<button class="btn btn-ghost btn-sm" onclick="markAllRead()">Marcar todas como leídas</button>`:''}
+  </div>`;
+
+  if(!notifs.length){html+=`<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No tenés notificaciones</div></div>`;$('content').innerHTML=html;return;}
+
+  html+=`<div style="display:flex;flex-direction:column;gap:8px">`;
+  notifs.forEach(n=>{
+    const isUnread=!n.readAt;
+    html+=`<div class="card" style="${isUnread?'border-color:var(--primary);':'opacity:.75'}" onclick="markRead('${n.id}')" style="cursor:pointer">
+      <div class="card-body" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px">
+        <div style="flex-shrink:0;width:8px;height:8px;border-radius:50%;background:${isUnread?'var(--primary)':'var(--border)'};margin-top:5px"></div>
+        <div style="flex:1">
+          <div style="font-weight:600;color:var(--text-1);margin-bottom:3px">${esc(n.subject)}</div>
+          <div style="font-size:13px;color:var(--text-2)">${esc(n.body)}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;font-family:'JetBrains Mono',monospace">${fmtDate(n.sentAt)}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+
+function markRead(id) {
+  DB.update('notifications',id,{readAt:now()});
+  updateNotifBell();
+  render();
+}
+
+function markAllRead() {
+  DB.find('notifications',n=>n.recipientId===SESSION.id&&!n.readAt).forEach(n=>DB.update('notifications',n.id,{readAt:now()}));
+  updateNotifBell();
+  render();
+}
+
+// ── Extended vendor dashboard (onboarding checklist) ───────────────────────
+function vendorOnboardingBanner() {
+  const hasFiscal=!!DB.one('fiscalProfiles',f=>f.vendorId===SESSION.id&&f.taxId);
+  const hasContract=!!DB.one('vendorContracts',c=>c.vendorId===SESSION.id&&c.isCurrent);
+  const hasLink=DB.find('affiliateLinks',l=>l.vendorId===SESSION.id&&l.isActive).length>0;
+  if(hasFiscal&&hasContract&&hasLink) return '';
+  return `<div class="card mb-4" style="border-color:var(--primary);margin-bottom:20px">
+    <div class="card-hd" style="background:var(--primary-dim)"><span class="card-title" style="color:var(--primary)">🚀 Completá tu configuración inicial</span></div>
+    <div class="card-body"><div class="checklist">
+      <div class="check-item${hasFiscal?' done':''}">
+        <span class="check-icon">${hasFiscal?'✅':'📋'}</span>
+        <div><div class="check-label">Completar perfil fiscal</div><div class="check-sub">${hasFiscal?'Datos cargados':'Requerido para cobrar comisiones'}</div></div>
+        ${!hasFiscal?`<button class="btn btn-xs btn-primary" style="margin-left:auto" onclick="navigate('fiscal')">Completar →</button>`:''}
+      </div>
+      <div class="check-item${hasContract?' done':''}">
+        <span class="check-icon">${hasContract?'✅':'📝'}</span>
+        <div><div class="check-label">Firmar acuerdo de afiliado</div><div class="check-sub">${hasContract?'Contrato vigente':'Bloqueado hasta la firma'}</div></div>
+        ${!hasContract?`<button class="btn btn-xs btn-primary" style="margin-left:auto" onclick="navigate('fiscal')">Firmar →</button>`:''}
+      </div>
+      <div class="check-item${hasLink?' done':''}">
+        <span class="check-icon">${hasLink?'✅':'🔗'}</span>
+        <div><div class="check-label">Generar tu primer link de afiliado</div><div class="check-sub">${hasLink?'Link activo':'Andá al catálogo y generá tu link'}</div></div>
+        ${!hasLink?`<button class="btn btn-xs btn-primary" style="margin-left:auto" onclick="navigate('catalog')">Ir al catálogo →</button>`:''}
+      </div>
+    </div></div>
+  </div>`;
+}
+
+// ── Seed: extend with new collections ─────────────────────────────────────
+function seedNewCollections() {
+  if(DB.all('commissionRules').length===0){
+    DB.insert('commissionRules',{id:uid(),scope:'GLOBAL',vendorId:null,productId:null,type:'PERCENT',value:0.15,tiersConfig:null,holdDays:15,guaranteeDays:30,isActive:true,createdAt:now()});
+  }
+  if(DB.all('fraudAlerts').length===0){
+    // no initial alerts
+  }
+  if(DB.all('notifications').length===0){
+    const vendor=DB.one('users',u=>u.role==='VENDOR'&&u.status==='ACTIVE');
+    if(vendor){
+      DB.insert('notifications',{id:uid(),recipientId:vendor.id,type:'ACCOUNT_APPROVED',channel:'IN_APP',subject:'✓ Cuenta aprobada',body:'Tu cuenta fue aprobada. Completá tu perfil fiscal y firmá el contrato para comenzar a cobrar comisiones.',refEntity:'user',refId:vendor.id,readAt:null,sentAt:now()});
+    }
+  }
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+async function boot() {
+  if(!SESSION){
+    $('app').classList.add('hidden');
+    $('register').classList.add('hidden');
+    $('auth').classList.remove('hidden');
+    $('auth').style.display='flex';
+    return;
+  }
+  // Check user still active
+  const user=DB.one('users',u=>u.id===SESSION.id);
+  if(!user||user.status!=='ACTIVE'){clearSession();boot();return;}
+
+  $('auth').classList.add('hidden');
+  $('register').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('sb-name').textContent=SESSION.fullName;
+  $('sb-role').textContent=SESSION.role==='ADMIN'?'Administrador':'Vendedor';
+  buildNav(SESSION.role);
+  updateNotifBell();
+  await render();
+}
+
+(async()=>{
+  await seedIfEmpty();
+  seedNewCollections();
+  await boot();
+})();
+</script>
+</body>
+</html>
