@@ -215,6 +215,43 @@ select.form-input option{background:var(--surface)}
 .check-icon{font-size:18px;flex-shrink:0}
 .check-label{font-size:13px;font-weight:600;color:var(--text-1)}
 .check-sub{font-size:12px;color:var(--text-3);margin-top:2px}
+
+/* ── Mobile topbar ───────────────────────────────────────────────── */
+.mobile-topbar{display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--sb-bg);border-bottom:1px solid var(--sb-border);position:sticky;top:0;z-index:40;flex-shrink:0}
+.mobile-brand{font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:#fff}
+.hamburger{background:none;border:none;color:var(--sb-text);font-size:22px;cursor:pointer;padding:2px 6px;line-height:1;border-radius:4px}
+.hamburger:hover{background:var(--sb-hover)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
+.sb-overlay.show{display:block}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media(max-width:768px){
+  #sidebar{position:fixed;top:0;left:-240px;bottom:0;z-index:50;width:240px;transition:left .25s ease;overflow-y:auto}
+  #sidebar.open{left:0}
+  .mobile-topbar{display:flex}
+  #app{flex-direction:column}
+  #main{margin-left:0;overflow-y:auto;display:flex;flex-direction:column;height:100vh}
+  .page{padding:16px 14px 64px}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-val{font-size:20px}
+  .page-hd{flex-direction:column;align-items:flex-start;gap:10px}
+  .page-hd .btn{width:100%;justify-content:center}
+  .form-row{grid-template-columns:1fr}
+  #modal-overlay{padding:12px 10px;align-items:flex-end}
+  .modal-box{max-height:92vh;border-radius:12px 12px 0 0}
+  table{font-size:12px}
+  th,td{padding:8px 10px}
+  .pipeline{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+  .pipeline-col{flex:0 0 200px}
+  #toast-box{left:12px;right:12px;top:auto;bottom:16px}
+  .toast{max-width:100%}
+  .auth-card{padding:28px 20px}
+  .card-hd{flex-wrap:wrap;gap:8px}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr}
+  .btn-xs{padding:5px 10px;font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -271,6 +308,7 @@ select.form-input option{background:var(--surface)}
 
 <!-- App shell -->
 <div id="app" class="hidden">
+  <div id="sb-overlay" class="sb-overlay" onclick="closeSidebar()"></div>
   <aside id="sidebar">
     <div class="sb-brand">
       <div class="sb-brand-label">CRM</div>
@@ -291,6 +329,13 @@ select.form-input option{background:var(--surface)}
     </div>
   </aside>
   <main id="main">
+    <div class="mobile-topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="mobile-brand">CRM Afiliados</span>
+      <div style="position:relative;display:inline-flex">
+        <button class="notif-bell" onclick="closeSidebar();navigate('notifications')" style="padding:5px 9px;font-size:13px">🔔 <span id="notif-count-mobile" style="display:none;background:var(--danger);color:#fff;border-radius:9999px;font-size:10px;font-weight:700;padding:1px 5px;margin-left:2px">0</span></button>
+      </div>
+    </div>
     <div class="page" id="content"><!-- views render here --></div>
   </main>
 </div>
@@ -531,6 +576,7 @@ function navigate(view) {
   currentView = view;
   buildNav(SESSION.role);
   render();
+  closeSidebar();
 }
 
 async function render() {
@@ -1633,11 +1679,21 @@ function viewContractHistory() {
 function updateNotifBell() {
   if(!SESSION)return;
   const unread=DB.find('notifications',n=>n.recipientId===SESSION.id&&!n.readAt).length;
-  const badge=$('notif-count');
-  if(badge){
-    badge.textContent=unread>9?'9+':unread;
-    badge.style.display=unread>0?'flex':'none';
-  }
+  const label=unread>9?'9+':String(unread);
+  ['notif-count','notif-count-mobile'].forEach(id=>{
+    const badge=$(id);
+    if(badge){badge.textContent=label;badge.style.display=unread>0?'flex':'none';}
+  });
+}
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sb-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('show');
 }
 
 async function viewNotifications() {
