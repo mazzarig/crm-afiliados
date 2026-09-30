@@ -261,7 +261,7 @@ select.form-input option{background:var(--surface)}
   <div class="auth-card">
     <div class="auth-logo">CRM Afiliados</div>
     <div class="auth-title">Iniciar sesión</div>
-    <div class="auth-sub">Accedé a tu panel personalizado</div>
+    <div class="auth-sub">Accede a tu panel personalizado</div>
     <div id="auth-error" class="form-error hidden"></div>
     <form id="login-form" onsubmit="doLogin(event)">
       <div class="form-group">
@@ -683,7 +683,7 @@ async function viewDashboard() {
       });
       html+=`</tbody></table></div></div>`;
     } else {
-      html += `<div class="card"><div class="card-body empty"><div class="empty-icon">⊡</div><div class="empty-text">No tenés pedidos activos. <a href="#" onclick="navigate('pipeline')">Agregar prospecto →</a></div></div></div>`;
+      html += `<div class="card"><div class="card-body empty"><div class="empty-icon">⊡</div><div class="empty-text">No tienes pedidos activos. <a href="#" onclick="navigate('pipeline')">Agregar prospecto →</a></div></div></div>`;
     }
   }
 
@@ -718,7 +718,7 @@ async function viewVendors() {
 
 function approveVendor(id) {
   DB.update('users', id, { status:'ACTIVE', approvedBy:SESSION.id, approvedAt:now() });
-  addNotification(id,'ACCOUNT_APPROVED','✓ Cuenta aprobada','Tu cuenta de vendedor fue aprobada. Ya podés ingresar al sistema.','user',id);
+  addNotification(id,'ACCOUNT_APPROVED','✓ Cuenta aprobada','Tu cuenta de vendedor fue aprobada. Ya puedes ingresar al sistema.','user',id);
   toast('Vendedor aprobado', 'success');
   render();
 }
@@ -1001,7 +1001,7 @@ function genUrl(code) { return `crm.afiliados.com/r/${code}`; }
 
 function createLink(productId) {
   const existing=DB.one('affiliateLinks',l=>l.vendorId===SESSION.id&&l.productId===productId&&l.isActive);
-  if(existing){toast('Ya tenés un link para este producto');render();return;}
+  if(existing){toast('Ya tienes un link para este producto');render();return;}
   const id=uid(), code=genCode();
   DB.insert('affiliateLinks',{id,vendorId:SESSION.id,productId,code,isActive:true,createdAt:now()});
   toast('Link de afiliado creado','success');
@@ -1016,9 +1016,9 @@ function copyLink(code) {
 // ── VENDOR: Links ──────────────────────────────────────────────────────────
 async function viewLinks() {
   const links=DB.find('affiliateLinks',l=>l.vendorId===SESSION.id&&l.isActive).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
-  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mis links de afiliado</div><div class="page-sub">Usá estos links para atribuir ventas a tu cuenta</div></div><button class="btn btn-primary" onclick="navigate('catalog')">+ Generar nuevo link</button></div>`;
+  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mis links de afiliado</div><div class="page-sub">Usa estos links para atribuir ventas a tu cuenta</div></div><button class="btn btn-primary" onclick="navigate('catalog')">+ Generar nuevo link</button></div>`;
   html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Precio</th><th>Código</th><th>URL</th><th>Ventas</th><th>Creado</th><th></th></tr></thead><tbody>`;
-  if(!links.length){html+=`<tr><td colspan="7" class="empty">No tenés links. <a href="#" onclick="navigate('catalog')">Generá uno desde el catálogo →</a></td></tr>`;}
+  if(!links.length){html+=`<tr><td colspan="7" class="empty">No tienes links. <a href="#" onclick="navigate('catalog')">Genera uno desde el catálogo →</a></td></tr>`;}
   links.forEach(l=>{
     const pr=DB.one('products',p=>p.id===l.productId);
     const saleCount=DB.find('sales',s=>s.affiliateLinkId===l.id).length;
@@ -1231,7 +1231,7 @@ function openNewOrder() {
   if(!myClients.length){
     openModal('Nuevo prospecto',`
       <div class="modal-body">
-        <p style="color:var(--text-2);margin-bottom:14px">Primero agregá un cliente/prospecto:</p>
+        <p style="color:var(--text-2);margin-bottom:14px">Primero agrega un cliente/prospecto:</p>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Nombre completo</label><input id="nc-name" class="form-input" placeholder="Empresa SA" required></div>
           <div class="form-group"><label class="form-label">Teléfono</label><input id="nc-phone" class="form-input" placeholder="+54 11 0000-0000"></div>
@@ -1328,7 +1328,7 @@ async function viewMyCommissions() {
     <div class="stat"><div class="stat-label">Total ventas</div><div class="stat-val">${comms.filter(c=>c.status!=='REVERSED').length}</div></div>
   </div>`;
   html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Cliente</th><th>Venta</th><th>Tasa</th><th>Comisión</th><th>Estado</th><th>Libera / Pagado</th></tr></thead><tbody>`;
-  if(!comms.length){html+=`<tr><td colspan="7" class="empty">Todavía no generaste comisiones. Confirmá un pago en el pipeline.</td></tr>`;}
+  if(!comms.length){html+=`<tr><td colspan="7" class="empty">Todavía no tienes comisiones. Confirma un pago en el pipeline.</td></tr>`;}
   comms.forEach(c=>{
     const sale=DB.one('sales',s=>s.id===c.saleId);
     const pr=sale?DB.one('products',p=>p.id===sale.productId):null;
@@ -1592,7 +1592,7 @@ async function viewFiscalProfile() {
   let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mi perfil fiscal y contrato</div><div class="page-sub">Datos necesarios para el pago de comisiones</div></div></div>`;
 
   if(!activeContract){
-    html+=`<div class="alert-banner alert-banner-danger">⚠ No tenés un contrato activo. El pago de comisiones está bloqueado hasta que aceptes los términos.</div>`;
+    html+=`<div class="alert-banner alert-banner-danger">⚠ No tienes un contrato activo. El pago de comisiones está bloqueado hasta que aceptes los términos.</div>`;
   }
 
   html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -1704,7 +1704,7 @@ async function viewNotifications() {
     ${unread>0?`<button class="btn btn-ghost btn-sm" onclick="markAllRead()">Marcar todas como leídas</button>`:''}
   </div>`;
 
-  if(!notifs.length){html+=`<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No tenés notificaciones</div></div>`;$('content').innerHTML=html;return;}
+  if(!notifs.length){html+=`<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No tienes notificaciones</div></div>`;$('content').innerHTML=html;return;}
 
   html+=`<div style="display:flex;flex-direction:column;gap:8px">`;
   notifs.forEach(n=>{
@@ -1743,7 +1743,7 @@ function vendorOnboardingBanner() {
   const hasLink=DB.find('affiliateLinks',l=>l.vendorId===SESSION.id&&l.isActive).length>0;
   if(hasFiscal&&hasContract&&hasLink) return '';
   return `<div class="card mb-4" style="border-color:var(--primary);margin-bottom:20px">
-    <div class="card-hd" style="background:var(--primary-dim)"><span class="card-title" style="color:var(--primary)">🚀 Completá tu configuración inicial</span></div>
+    <div class="card-hd" style="background:var(--primary-dim)"><span class="card-title" style="color:var(--primary)">🚀 Completa tu configuración inicial</span></div>
     <div class="card-body"><div class="checklist">
       <div class="check-item${hasFiscal?' done':''}">
         <span class="check-icon">${hasFiscal?'✅':'📋'}</span>
@@ -1757,7 +1757,7 @@ function vendorOnboardingBanner() {
       </div>
       <div class="check-item${hasLink?' done':''}">
         <span class="check-icon">${hasLink?'✅':'🔗'}</span>
-        <div><div class="check-label">Generar tu primer link de afiliado</div><div class="check-sub">${hasLink?'Link activo':'Andá al catálogo y generá tu link'}</div></div>
+        <div><div class="check-label">Generar tu primer link de afiliado</div><div class="check-sub">${hasLink?'Link activo':'Ve al catálogo y genera tu link'}</div></div>
         ${!hasLink?`<button class="btn btn-xs btn-primary" style="margin-left:auto" onclick="navigate('catalog')">Ir al catálogo →</button>`:''}
       </div>
     </div></div>
@@ -1775,7 +1775,7 @@ function seedNewCollections() {
   if(DB.all('notifications').length===0){
     const vendor=DB.one('users',u=>u.role==='VENDOR'&&u.status==='ACTIVE');
     if(vendor){
-      DB.insert('notifications',{id:uid(),recipientId:vendor.id,type:'ACCOUNT_APPROVED',channel:'IN_APP',subject:'✓ Cuenta aprobada',body:'Tu cuenta fue aprobada. Completá tu perfil fiscal y firmá el contrato para comenzar a cobrar comisiones.',refEntity:'user',refId:vendor.id,readAt:null,sentAt:now()});
+      DB.insert('notifications',{id:uid(),recipientId:vendor.id,type:'ACCOUNT_APPROVED',channel:'IN_APP',subject:'✓ Cuenta aprobada',body:'Tu cuenta fue aprobada. Completa tu perfil fiscal y firma el contrato para comenzar a cobrar comisiones.',refEntity:'user',refId:vendor.id,readAt:null,sentAt:now()});
     }
   }
 }
