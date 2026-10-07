@@ -482,14 +482,6 @@ async function seedIfEmpty() {
     DB.insert('priceHistory', { id:uid(), productId:p.id, oldPrice:null, newPrice:p.price, changedBy:adminId, changedAt:now(), reason:'Precio inicial' });
   });
 
-  // Seed affiliate links for Carlos
-  const activeProds = prods.filter(p=>p.status==='ACTIVE').slice(0,3);
-  const linkIds = activeProds.map(p => {
-    const id=uid(), code=genCode();
-    DB.insert('affiliateLinks', { id, vendorId, productId:p.id, code, isActive:true, createdAt:now() });
-    return { id, productId:p.id, code };
-  });
-
   // Seed some clients for Carlos
   const clients = [
     { id:uid(), fullName:'Empresa Rodríguez SRL', email:'compras@rodriguez.com', phone:'+54 341 555-0101', originVendorId:vendorId, notes:'Interesados en informes de mercado', createdAt:now() },
@@ -555,7 +547,6 @@ const ADMIN_NAV = [
 const VENDOR_NAV = [
   { id:'dashboard', label:'Mi panel', icon:'⊞' },
   { id:'catalog', label:'Catálogo', icon:'▦' },
-  { id:'links', label:'Mis links', icon:'⊕' },
   { id:'pipeline', label:'Pipeline', icon:'⊡' },
   { id:'mycommissions', label:'Comisiones', icon:'◈' },
   { id:'fiscal', label:'Mi perfil fiscal', icon:'◎' },
@@ -593,7 +584,6 @@ async function render() {
     else if (v==='reporting' && r==='ADMIN') await viewReporting();
     else if (v==='fraud' && r==='ADMIN') await viewFraudAlerts();
     else if (v==='catalog' && r==='VENDOR') await viewCatalog();
-    else if (v==='links' && r==='VENDOR') await viewLinks();
     else if (v==='pipeline' && r==='VENDOR') await viewPipeline();
     else if (v==='mycommissions' && r==='VENDOR') await viewMyCommissions();
     else if (v==='fiscal' && r==='VENDOR') await viewFiscalProfile();
@@ -656,7 +646,7 @@ async function viewDashboard() {
   } else {
     const myOrders = DB.find('orders', o=>o.vendorId===SESSION.id);
     const myClients = DB.find('clients', c=>c.originVendorId===SESSION.id);
-    const myLinks = DB.find('affiliateLinks', l=>l.vendorId===SESSION.id&&l.isActive);
+
     const myComms = DB.find('commissions', c=>c.vendorId===SESSION.id);
     const pendingComm = myComms.filter(c=>['PENDING','RETENIDA','LIBERADA'].includes(c.status)).reduce((s,x)=>s+x.amount,0);
     const liberadaComm = myComms.filter(c=>c.status==='LIBERADA').reduce((s,x)=>s+x.amount,0);
@@ -667,7 +657,7 @@ async function viewDashboard() {
     html += `<div class="stats">
       <div class="stat"><div class="stat-label">Clientes</div><div class="stat-val">${myClients.length}</div></div>
       <div class="stat"><div class="stat-label">Pedidos activos</div><div class="stat-val">${myOrders.filter(o=>!['ENTREGADO','REEMBOLSADO'].includes(o.status)).length}</div></div>
-      <div class="stat"><div class="stat-label">Links activos</div><div class="stat-val">${myLinks.length}</div></div>
+
       <div class="stat accent"><div class="stat-label">En retención</div><div class="stat-val">$${fmt(pendingComm)}</div></div>
       ${liberadaComm>0?`<div class="stat" style="border-color:var(--m11,#6D28D9)"><div class="stat-label">A cobrar (liberada)</div><div class="stat-val" style="color:var(--m11,#6D28D9)">$${fmt(liberadaComm)}</div></div>`:''}
       <div class="stat success-card"><div class="stat-label">Total cobrado</div><div class="stat-val">$${fmt(paidComm)}</div></div>
@@ -978,7 +968,6 @@ async function viewCatalog() {
   if(!products.length){html+=`<div class="empty"><div class="empty-icon">▦</div><div class="empty-text">No hay productos activos</div></div>`;$('content').innerHTML=html;return;}
   html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">`;
   products.forEach(p=>{
-    const myLink=DB.one('affiliateLinks',l=>l.vendorId===SESSION.id&&l.productId===p.id&&l.isActive);
     html+=`<div class="card">
       <div class="card-hd" style="background:var(--surface-2)">
         <div><div class="td-bold">${esc(p.name)}</div><span class="badge b-gray" style="margin-top:4px;display:inline-flex">${esc(p.category||'—')}</span></div>
@@ -986,10 +975,7 @@ async function viewCatalog() {
       </div>
       <div class="card-body">
         <p style="font-size:13px;color:var(--text-2);margin-bottom:12px">${esc(p.description||'')}</p>
-        ${myLink
-          ? `<div><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Tu link de afiliado:</div><div class="link-code">${genUrl(myLink.code)}</div><button class="btn btn-xs btn-ghost" style="margin-top:6px" onclick="copyLink('${myLink.code}')">Copiar link</button></div>`
-          : `<button class="btn btn-primary btn-sm" onclick="createLink('${p.id}')">Generar mi link</button>`
-        }
+        <button class="btn btn-primary btn-sm" onclick="navigate('pipeline')">+ Nuevo prospecto</button>
       </div>
     </div>`;
   });
@@ -997,44 +983,6 @@ async function viewCatalog() {
   $('content').innerHTML=html;
 }
 
-function genUrl(code) { return `crm.afiliados.com/r/${code}`; }
-
-function createLink(productId) {
-  const existing=DB.one('affiliateLinks',l=>l.vendorId===SESSION.id&&l.productId===productId&&l.isActive);
-  if(existing){toast('Ya tienes un link para este producto');render();return;}
-  const id=uid(), code=genCode();
-  DB.insert('affiliateLinks',{id,vendorId:SESSION.id,productId,code,isActive:true,createdAt:now()});
-  toast('Link de afiliado creado','success');
-  render();
-}
-
-function copyLink(code) {
-  const url=genUrl(code);
-  navigator.clipboard?.writeText(url).then(()=>toast('Link copiado al portapapeles','success')).catch(()=>toast(`Link: ${url}`,'info'));
-}
-
-// ── VENDOR: Links ──────────────────────────────────────────────────────────
-async function viewLinks() {
-  const links=DB.find('affiliateLinks',l=>l.vendorId===SESSION.id&&l.isActive).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
-  let html=`<div class="page-hd"><div class="page-hd-left"><div class="page-title">Mis links de afiliado</div><div class="page-sub">Usa estos links para atribuir ventas a tu cuenta</div></div><button class="btn btn-primary" onclick="navigate('catalog')">+ Generar nuevo link</button></div>`;
-  html+=`<div class="card"><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Precio</th><th>Código</th><th>URL</th><th>Ventas</th><th>Creado</th><th></th></tr></thead><tbody>`;
-  if(!links.length){html+=`<tr><td colspan="7" class="empty">No tienes links. <a href="#" onclick="navigate('catalog')">Genera uno desde el catálogo →</a></td></tr>`;}
-  links.forEach(l=>{
-    const pr=DB.one('products',p=>p.id===l.productId);
-    const saleCount=DB.find('sales',s=>s.affiliateLinkId===l.id).length;
-    html+=`<tr>
-      <td class="td-bold">${esc(pr?.name||'—')}</td>
-      <td class="td-mono">$${fmt(pr?.currentPrice)}</td>
-      <td><span class="badge b-cyan">${esc(l.code)}</span></td>
-      <td><span class="link-code">${genUrl(l.code)}</span></td>
-      <td>${saleCount}</td>
-      <td class="td-mono">${fmtDate(l.createdAt)}</td>
-      <td><button class="btn btn-xs btn-ghost" onclick="copyLink('${l.code}')">Copiar</button></td>
-    </tr>`;
-  });
-  html+=`</tbody></table></div></div>`;
-  $('content').innerHTML=html;
-}
 
 // ── VENDOR: Pipeline ───────────────────────────────────────────────────────
 async function viewPipeline() {
@@ -1159,8 +1107,7 @@ function confirmPayment(orderId) {
 
   // Create sale
   const saleId=uid();
-  const link=DB.one('affiliateLinks',l=>l.vendorId===o.vendorId&&l.productId===o.productId&&l.isActive);
-  DB.insert('sales',{id:saleId,affiliateLinkId:link?.id||null,vendorId:o.vendorId,productId:o.productId,clientId:o.clientId,salePrice:o.agreedPrice,status:'CONFIRMED',attributedAt:now()});
+  DB.insert('sales',{id:saleId,affiliateLinkId:null,vendorId:o.vendorId,productId:o.productId,clientId:o.clientId,salePrice:o.agreedPrice,status:'CONFIRMED',attributedAt:now()});
 
   // Commission using rules
   const rule=getBestCommRule(o.vendorId,o.productId);
@@ -1740,8 +1687,7 @@ function markAllRead() {
 function vendorOnboardingBanner() {
   const hasFiscal=!!DB.one('fiscalProfiles',f=>f.vendorId===SESSION.id&&f.taxId);
   const hasContract=!!DB.one('vendorContracts',c=>c.vendorId===SESSION.id&&c.isCurrent);
-  const hasLink=DB.find('affiliateLinks',l=>l.vendorId===SESSION.id&&l.isActive).length>0;
-  if(hasFiscal&&hasContract&&hasLink) return '';
+  if(hasFiscal&&hasContract) return '';
   return `<div class="card mb-4" style="border-color:var(--primary);margin-bottom:20px">
     <div class="card-hd" style="background:var(--primary-dim)"><span class="card-title" style="color:var(--primary)">🚀 Completa tu configuración inicial</span></div>
     <div class="card-body"><div class="checklist">
@@ -1754,11 +1700,6 @@ function vendorOnboardingBanner() {
         <span class="check-icon">${hasContract?'✅':'📝'}</span>
         <div><div class="check-label">Firmar acuerdo de afiliado</div><div class="check-sub">${hasContract?'Contrato vigente':'Bloqueado hasta la firma'}</div></div>
         ${!hasContract?`<button class="btn btn-xs btn-primary" style="margin-left:auto" onclick="navigate('fiscal')">Firmar →</button>`:''}
-      </div>
-      <div class="check-item${hasLink?' done':''}">
-        <span class="check-icon">${hasLink?'✅':'🔗'}</span>
-        <div><div class="check-label">Generar tu primer link de afiliado</div><div class="check-sub">${hasLink?'Link activo':'Ve al catálogo y genera tu link'}</div></div>
-        ${!hasLink?`<button class="btn btn-xs btn-primary" style="margin-left:auto" onclick="navigate('catalog')">Ir al catálogo →</button>`:''}
       </div>
     </div></div>
   </div>`;
